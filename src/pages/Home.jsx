@@ -34,7 +34,7 @@ const Home = () => {
 
         const token = localStorage.getItem("token");
 
-        const res = await fetch(`${API}/api/products/`, {
+        const res = await fetch(`${API_BASE_URL}/api/products/`, {
           headers: token
             ? {
                 Authorization: `Bearer ${token}`,
