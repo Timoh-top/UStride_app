@@ -10,6 +10,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
 
+// ✅ Get API from environment
 const API = import.meta.env.VITE_API_URL;
 
 const Home = () => {
@@ -24,14 +25,24 @@ const Home = () => {
       setLoading(true);
 
       try {
+        // 🔍 Debug: check API value in production
+        console.log("API URL:", API);
+
+        if (!API) {
+          throw new Error("API URL is not defined. Check VITE_API_URL.");
+        }
+
         const token = localStorage.getItem("token");
 
         const res = await fetch(`${API}/api/products/`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: token
+            ? {
+                Authorization: `Bearer ${token}`,
+              }
+            : {},
         });
 
+        // 🔐 Handle expired/invalid token
         if (res.status === 401) {
           localStorage.removeItem("token");
           window.location.href = "/login";
@@ -40,15 +51,14 @@ const Home = () => {
 
         if (!res.ok) {
           const errText = await res.text();
-          throw new Error(errText);
+          throw new Error(errText || "Failed request");
         }
 
         const data = await res.json();
         setProducts(data);
         setError(null);
-
       } catch (err) {
-        console.log("Home error:", err);
+        console.error("Home error:", err);
         setError("Failed to load products");
       } finally {
         setLoading(false);
