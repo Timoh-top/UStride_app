@@ -7,6 +7,7 @@ import {
   Button,
   Box,
   IconButton,
+  Stack,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 
@@ -36,14 +37,19 @@ const ProductCard = ({
         borderRadius: 3,
         overflow: "hidden",
         position: "relative",
-        boxShadow: 2,
+        backgroundColor: "#fff",
+
+        boxShadow: "0 2px 10px rgba(0,0,0,0.08)",
+
+        transition: "all 0.25s ease-in-out",
 
         "&:hover": {
-          boxShadow: 6,
+          transform: "translateY(-4px)",
+          boxShadow: "0 10px 25px rgba(0,0,0,0.15)",
         },
       }}
     >
-      {/* DELETE ICON (TOP RIGHT) */}
+      {/* DELETE ICON */}
       {showDelete && (
         <IconButton
           onClick={onDelete}
@@ -51,10 +57,10 @@ const ProductCard = ({
             position: "absolute",
             top: 8,
             right: 8,
-            backgroundColor: "rgba(255,255,255,0.9)",
+            backgroundColor: "rgba(255,255,255,0.95)",
             zIndex: 10,
             "&:hover": {
-              backgroundColor: "rgba(255,0,0,0.1)",
+              backgroundColor: "#ffe5e5",
             },
           }}
         >
@@ -63,7 +69,14 @@ const ProductCard = ({
       )}
 
       {/* IMAGE */}
-      <Box sx={{ position: "relative", width: "100%", pt: "75%" }}>
+      <Box
+        sx={{
+          position: "relative",
+          width: "100%",
+          pt: "75%",
+          overflow: "hidden",
+        }}
+      >
         <CardMedia
           component="img"
           image={safeImage}
@@ -75,46 +88,87 @@ const ProductCard = ({
             width: "100%",
             height: "100%",
             objectFit: "cover",
+            transition: "transform 0.4s ease",
+
+            "&:hover": {
+              transform: "scale(1.05)",
+            },
           }}
         />
       </Box>
 
       {/* CONTENT */}
       <CardContent sx={{ flexGrow: 1, pb: 1 }}>
-        <Typography variant="subtitle1" fontWeight="bold" noWrap>
+        <Typography
+          variant="subtitle1"
+          fontWeight="700"
+          noWrap
+          sx={{ fontSize: "0.95rem" }}
+        >
           {name || "Unnamed Product"}
         </Typography>
 
         <Typography
           variant="caption"
-          sx={{ color: "text.secondary", display: "block", mt: 0.5 }}
+          sx={{
+            color: "text.secondary",
+            display: "block",
+            mt: 0.5,
+            fontSize: "0.75rem",
+          }}
           noWrap
         >
           {seller || "Unknown seller"}
         </Typography>
 
+        {/* PRICE */}
         <Typography
-          variant="h6"
-          sx={{ color: "green", fontWeight: "bold", mt: 1 }}
+          sx={{
+            color: "#1a7f37",
+            fontWeight: "800",
+            mt: 1,
+            fontSize: "1.05rem",
+          }}
         >
           ₦{formatPrice(price)}
         </Typography>
       </CardContent>
 
-      {/* BUTTON */}
+      {/* BUTTON AREA */}
       <Box sx={{ p: 1.5, pt: 0 }}>
-        <Button
-          fullWidth
-          variant="contained"
-          onClick={onBuyNow}
-          sx={{
-            borderRadius: 2,
-            textTransform: "none",
-            fontWeight: 600,
-          }}
-        >
-          Buy Now
-        </Button>
+        <Stack spacing={1}>
+          <Button
+            fullWidth
+            variant="contained"
+            onClick={onBuyNow}
+            sx={{
+              borderRadius: 2,
+              textTransform: "none",
+              fontWeight: 600,
+              background: "linear-gradient(135deg, #ff7a00, #ff5400)",
+              boxShadow: "none",
+
+              "&:hover": {
+                boxShadow: "0 6px 15px rgba(255,84,0,0.3)",
+              },
+            }}
+          >
+            Buy Now
+          </Button>
+
+          <Button
+            fullWidth
+            variant="outlined"
+            sx={{
+              borderRadius: 2,
+              textTransform: "none",
+              fontWeight: 500,
+              fontSize: "0.8rem",
+            }}
+          >
+            View Details
+          </Button>
+        </Stack>
       </Box>
     </Card>
   );
