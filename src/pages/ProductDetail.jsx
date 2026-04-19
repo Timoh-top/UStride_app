@@ -11,8 +11,7 @@ import {
 import { useParams, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import ReviewForm from "../components/ReviewForm";
-
-const API = import.meta.env.VITE_API_URL;
+import API_BASE_URL from "../api";
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -23,15 +22,12 @@ const ProductDetail = () => {
   const [error, setError] = useState(null);
   const [refresh, setRefresh] = useState(false);
 
-  // =========================
-  // FETCH PRODUCT
-  // =========================
   useEffect(() => {
     const fetchProduct = async () => {
       try {
         const token = localStorage.getItem("token");
 
-        const res = await fetch(`${API}/api/products/${id}/`, {
+        const res = await fetch(`${API_BASE_URL}/api/products/${id}/`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
 
@@ -42,7 +38,7 @@ const ProductDetail = () => {
         const data = await res.json();
         setProduct(data);
       } catch (err) {
-        console.log("Product detail error:", err);
+        console.log(err);
         setError("Failed to load product");
       }
     };
@@ -50,74 +46,26 @@ const ProductDetail = () => {
     fetchProduct();
   }, [id, refresh]);
 
-  // =========================
-  // STATES
-  // =========================
-  if (error) {
-    return (
-      <Typography sx={{ textAlign: "center", mt: 5 }} color="error">
-        {error}
-      </Typography>
-    );
-  }
+  if (error) return <Typography color="error">{error}</Typography>;
+  if (!product) return <Typography>Loading...</Typography>;
 
-  if (!product) {
-    return (
-      <Typography sx={{ textAlign: "center", mt: 5 }}>
-        Loading product...
-      </Typography>
-    );
-  }
-
-  // =========================
-  // IMAGE FIX (IMPORTANT)
-  // =========================
   const imageUrl = product.image?.startsWith("http")
     ? product.image
-    : product.image
-    ? `${API}${product.image}`
-    : "/placeholder.png";
-
-  // =========================
-  // ADD TO CART
-  // =========================
-  const handleAddToCart = () => {
-    addToCart({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      image: product.image,
-    });
-  };
+    : `${API_BASE_URL}${product.image}`;
 
   return (
-    <Box sx={{ px: 2, py: 2, maxWidth: "1000px", mx: "auto" }}>
-      <Card sx={{ borderRadius: 3, overflow: "hidden" }}>
-        <CardMedia
-          component="img"
-          image={imageUrl}
-          alt={product.name}
-          sx={{ height: 300, objectFit: "cover" }}
-        />
-
-        <Box sx={{ p: 2 }}>
-          <Typography variant="h5" fontWeight="bold">
-            {product.name}
-          </Typography>
-
-          <Typography sx={{ color: "green", fontWeight: "bold", mt: 1 }}>
-            ₦{product.price}
-          </Typography>
-
-          <Typography sx={{ mt: 2, color: "text.secondary" }}>
-            {product.description}
-          </Typography>
+    <Box sx={{ maxWidth: 900, mx: "auto", p: 2 }}>
+      <Card>
+        <CardMedia component="img" height="300" image={imageUrl} />
+        <Box p={2}>
+          <Typography variant="h5">{product.name}</Typography>
+          <Typography color="green">₦{product.price}</Typography>
+          <Typography mt={2}>{product.description}</Typography>
         </Box>
       </Card>
 
-      {/* ACTIONS */}
       <Paper sx={{ mt: 2, p: 2, display: "flex", gap: 1 }}>
-        <Button fullWidth variant="outlined" onClick={handleAddToCart}>
+        <Button fullWidth onClick={() => addToCart(product)}>
           Add to Cart
         </Button>
 
@@ -125,7 +73,7 @@ const ProductDetail = () => {
           fullWidth
           variant="contained"
           onClick={() => {
-            handleAddToCart();
+            addToCart(product);
             navigate("/cart");
           }}
         >
@@ -133,26 +81,14 @@ const ProductDetail = () => {
         </Button>
       </Paper>
 
-      {/* REVIEWS */}
-      <Box sx={{ mt: 4 }}>
-        <Typography variant="h6">Reviews</Typography>
-        <Divider sx={{ my: 2 }} />
+      <Divider sx={{ my: 3 }} />
 
-        {product.reviews?.length ? (
-          product.reviews.map((r) => (
-            <Paper key={r.id} sx={{ p: 2, mb: 2 }}>
-              <Typography>{r.review}</Typography>
-            </Paper>
-          ))
-        ) : (
-          <Typography>No reviews yet</Typography>
-        )}
+      <Typography variant="h6">Reviews</Typography>
 
-        <ReviewForm
-          productId={product.id}
-          onReviewSubmitted={() => setRefresh((p) => !p)}
-        />
-      </Box>
+      <ReviewForm
+        productId={product.id}
+        onReviewSubmitted={() => setRefresh(!refresh)}
+      />
     </Box>
   );
 };

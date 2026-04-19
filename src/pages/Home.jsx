@@ -9,9 +9,7 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
-
-// ✅ Get API from environment
-const API = import.meta.env.VITE_API_URL;
+import API_BASE_URL from "../api";
 
 const Home = () => {
   const [products, setProducts] = useState([]);
@@ -25,11 +23,8 @@ const Home = () => {
       setLoading(true);
 
       try {
-        // 🔍 Debug: check API value in production
-        console.log("API URL:", API);
-
-        if (!API) {
-          throw new Error("API URL is not defined. Check VITE_API_URL.");
+        if (!API_BASE_URL) {
+          throw new Error("API base URL is not defined");
         }
 
         const token = localStorage.getItem("token");
@@ -42,7 +37,6 @@ const Home = () => {
             : {},
         });
 
-        // 🔐 Handle expired/invalid token
         if (res.status === 401) {
           localStorage.removeItem("token");
           window.location.href = "/login";
@@ -51,7 +45,7 @@ const Home = () => {
 
         if (!res.ok) {
           const errText = await res.text();
-          throw new Error(errText || "Failed request");
+          throw new Error(errText || "Failed to fetch products");
         }
 
         const data = await res.json();
@@ -68,66 +62,36 @@ const Home = () => {
     fetchProducts();
   }, []);
 
-  // =========================
-  // SKELETON CARD
-  // =========================
   const SkeletonCard = () => (
     <Card sx={{ borderRadius: 2, overflow: "hidden" }}>
       <Skeleton variant="rectangular" height={160} />
       <CardContent>
-        <Skeleton width="80%" height={20} />
-        <Skeleton width="40%" height={20} sx={{ mt: 1 }} />
-        <Skeleton width="60%" height={25} sx={{ mt: 1 }} />
+        <Skeleton width="80%" />
+        <Skeleton width="40%" />
       </CardContent>
     </Card>
   );
 
   return (
-    <Box
-      sx={{
-        px: { xs: 1, sm: 2, md: 4 },
-        py: 3,
-        maxWidth: "1200px",
-        mx: "auto",
-      }}
-    >
-      {/* HEADER */}
-      <Typography
-        variant="h5"
-        sx={{
-          fontWeight: "bold",
-          mb: 2,
-          fontSize: { xs: "1.2rem", sm: "1.5rem" },
-        }}
-      >
+    <Box sx={{ px: 2, py: 3, maxWidth: "1200px", mx: "auto" }}>
+      <Typography variant="h5" fontWeight="bold" mb={2}>
         Discover Products
       </Typography>
 
-      {/* ERROR */}
-      {error && !loading && (
-        <Typography color="error" sx={{ textAlign: "center", mb: 2 }}>
+      {error && (
+        <Typography color="error" mb={2}>
           {error}
         </Typography>
       )}
 
-      {/* EMPTY STATE */}
-      {!loading && !error && products.length === 0 && (
-        <Typography sx={{ textAlign: "center", mt: 5 }}>
-          No products yet. Be the first to post 🚀
-        </Typography>
-      )}
-
-      {/* GRID */}
       <Grid container spacing={2}>
-        {/* LOADING */}
         {loading &&
-          Array.from(new Array(8)).map((_, index) => (
-            <Grid item xs={6} sm={4} md={3} key={index}>
+          Array.from({ length: 8 }).map((_, i) => (
+            <Grid item xs={6} sm={4} md={3} key={i}>
               <SkeletonCard />
             </Grid>
           ))}
 
-        {/* PRODUCTS */}
         {!loading &&
           !error &&
           products.map((product) => (
@@ -139,7 +103,7 @@ const Home = () => {
                   product.image
                     ? product.image.startsWith("http")
                       ? product.image
-                      : `${API}${product.image}`
+                      : `${API_BASE_URL}${product.image}`
                     : "/placeholder.png"
                 }
                 seller={
