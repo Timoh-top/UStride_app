@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -23,11 +23,27 @@ const CreateProduct = () => {
     category: "",
   });
 
+  const [categories, setCategories] = useState([]);
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const token = localStorage.getItem("token");
+
+  // ================= FETCH CATEGORIES =================
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/categories/`);
+        const data = await res.json();
+        setCategories(data);
+      } catch (err) {
+        console.log("Category fetch error:", err);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   // ================= HANDLE INPUT =================
   const handleChange = (e) => {
@@ -56,8 +72,8 @@ const CreateProduct = () => {
       return;
     }
 
-    if (!form.name || !form.price) {
-      alert("Name and price are required");
+    if (!form.name || !form.price || !form.category) {
+      alert("Name, price and category are required");
       return;
     }
 
@@ -75,16 +91,13 @@ const CreateProduct = () => {
         formData.append("image", image);
       }
 
-      const res = await fetch(
-        `${API_BASE_URL}/api/products/`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          body: formData,
-        }
-      );
+      const res = await fetch(`${API_BASE_URL}/api/products/`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
 
       if (!res.ok) {
         const errText = await res.text();
@@ -112,15 +125,8 @@ const CreateProduct = () => {
         p: 2,
       }}
     >
-      <Paper
-        sx={{
-          p: 4,
-          width: "100%",
-          maxWidth: 500,
-          borderRadius: 3,
-        }}
-      >
-        <Typography variant="h5" fontWeight="bold" mb={1}>
+      <Paper sx={{ p: 4, width: "100%", maxWidth: 500, borderRadius: 3 }}>
+        <Typography variant="h5" fontWeight="bold">
           Create Product
         </Typography>
 
@@ -164,21 +170,26 @@ const CreateProduct = () => {
             onChange={handleChange}
           />
 
-          {/* CATEGORY */}
+          {/* CATEGORY (DYNAMIC FIX) */}
           <TextField
             select
             label="Category"
             name="category"
             fullWidth
+            required
             margin="normal"
             value={form.category}
             onChange={handleChange}
           >
-            <MenuItem value="food">Food</MenuItem>
-            <MenuItem value="fashion">Fashion</MenuItem>
-            <MenuItem value="gadgets">Gadgets</MenuItem>
-            <MenuItem value="academics">Academics</MenuItem>
-            <MenuItem value="skills">Skills</MenuItem>
+            {categories.length === 0 ? (
+              <MenuItem disabled>Loading categories...</MenuItem>
+            ) : (
+              categories.map((cat) => (
+                <MenuItem key={cat.id} value={cat.id}>
+                  {cat.name}
+                </MenuItem>
+              ))
+            )}
           </TextField>
 
           {/* IMAGE UPLOAD */}
@@ -218,12 +229,7 @@ const CreateProduct = () => {
             fullWidth
             variant="contained"
             disabled={loading}
-            sx={{
-              mt: 2,
-              py: 1.5,
-              borderRadius: 2,
-              textTransform: "none",
-            }}
+            sx={{ mt: 2, py: 1.5, borderRadius: 2 }}
           >
             {loading ? (
               <CircularProgress size={22} />
