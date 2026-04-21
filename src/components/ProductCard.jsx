@@ -6,10 +6,16 @@ import {
   Typography,
   Button,
   Box,
-  Stack,
 } from "@mui/material";
 
 const ProductCard = ({ name, price, image, seller, onBuyNow }) => {
+  const imageUrl =
+    image?.startsWith("http")
+      ? image
+      : image
+      ? image
+      : "/placeholder.png";
+
   return (
     <Card
       sx={{
@@ -23,12 +29,10 @@ const ProductCard = ({ name, price, image, seller, onBuyNow }) => {
         "&:hover": { transform: "scale(1.02)" },
       }}
     >
-
-      {/* IMAGE FIX */}
       <Box sx={{ position: "relative", width: "100%", pt: "100%" }}>
         <CardMedia
           component="img"
-          image={image}
+          image={imageUrl}
           sx={{
             position: "absolute",
             width: "100%",
@@ -39,7 +43,6 @@ const ProductCard = ({ name, price, image, seller, onBuyNow }) => {
         />
       </Box>
 
-      {/* CONTENT */}
       <CardContent>
         <Typography noWrap fontWeight="700">
           {name}
@@ -54,14 +57,8 @@ const ProductCard = ({ name, price, image, seller, onBuyNow }) => {
         </Typography>
       </CardContent>
 
-      {/* BUTTON */}
       <Box p={1.5}>
-        <Button
-          fullWidth
-          variant="contained"
-          onClick={onBuyNow}
-          sx={{ borderRadius: 2 }}
-        >
+        <Button fullWidth variant="contained" onClick={onBuyNow}>
           Buy Now
         </Button>
       </Box>
