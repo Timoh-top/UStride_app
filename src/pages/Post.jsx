@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   Box,
   TextField,
@@ -12,144 +12,126 @@ import toast from "react-hot-toast";
 
 const API = import.meta.env.VITE_API_URL;
 
-const handleSubmit = async () => {
-  if (!title || !price) {
-    toast.error("Fill required fields");
-    return;
-  }
+const CreatePost = () => {
+  const navigate = useNavigate();
 
-  setLoading(true);
+  const [title, setTitle] = useState("");
+  const [price, setPrice] = useState("");
+  const [description, setDescription] = useState("");
+  const [category, setCategory] = useState("");
+  const [imageFile, setImageFile] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  try {
-    const token = localStorage.getItem("token");
+  const handleSubmit = async () => {
+    if (!title || !price) {
+      toast.error("Fill required fields");
+      return;
+    }
 
-    const formData = new FormData();
-    formData.append("name", title);
-    formData.append("description", description);
-    formData.append("price", price);
+    setLoading(true);
 
-    if (category) formData.append("category", category);
-    if (imageFile) formData.append("image", imageFile);
-
-    const response = await fetch(`${API}/api/products/create/`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      body: formData,
-    });
-
-    const text = await response.text();
-
-    let data;
     try {
-      data = JSON.parse(text);
+      const token = localStorage.getItem("token");
+
+      const formData = new FormData();
+      formData.append("name", title);
+      formData.append("description", description);
+      formData.append("price", price);
+
+      if (category) formData.append("category", category);
+      if (imageFile) formData.append("image", imageFile);
+
+      const response = await fetch(`${API}/api/products/`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data?.detail || "Failed to create product");
+      }
+
+      toast.success("Product created 🎉");
+      navigate("/home");
+
     } catch (err) {
-      console.log("NON-JSON RESPONSE:", text);
-      throw new Error("Server error (not JSON)");
+      toast.error(err.message);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    if (!response.ok) {
-      throw new Error(data?.detail || "Failed to create product");
-    }
+  return (
+    <Box sx={{ display: "flex", justifyContent: "center", mt: 3, px: 2 }}>
+      <Paper sx={{ p: 3, width: "100%", maxWidth: 420, borderRadius: 3 }}>
+        <Typography variant="h6" mb={2}>
+          Create Product
+        </Typography>
 
-    toast.success("Product created 🎉");
-    navigate("/home");
+        <TextField
+          fullWidth
+          label="Product Name"
+          sx={{ mb: 2 }}
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
 
-  } catch (err) {
-    toast.error(err.message);
-  } finally {
-    setLoading(false);
-  }
-};
+        <TextField
+          fullWidth
+          label="Price (₦)"
+          type="number"
+          sx={{ mb: 2 }}
+          value={price}
+          onChange={(e) => setPrice(e.target.value)}
+        />
 
-return (
-  <Box
-    sx={{
-      display: "flex",
-      justifyContent: "center",
-      mt: 3,
-      px: 2,
-    }}
-  >
-    <Paper
-      sx={{
-        p: 3,
-        width: "100%",
-        maxWidth: 420,
-        borderRadius: 3,
-      }}
-    >
-      <Typography variant="h6" mb={2}>
-        Create Product
-      </Typography>
+        <TextField
+          fullWidth
+          label="Description"
+          multiline
+          rows={3}
+          sx={{ mb: 2 }}
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
 
-      {/* NAME */}
-      <TextField
-        fullWidth
-        label="Product Name"
-        sx={{ mb: 2 }}
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-      />
+        <TextField
+          select
+          label="Category"
+          fullWidth
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          sx={{ mb: 2 }}
+        >
+          {categories.map((cat) => (
+            <MenuItem key={cat.id} value={cat.slug}>
+              {cat.name}
+            </MenuItem>
+          ))}
+        </TextField>
 
-      {/* PRICE */}
-      <TextField
-        fullWidth
-        label="Price (₦)"
-        type="number"
-        sx={{ mb: 2 }}
-        value={price}
-        onChange={(e) => setPrice(e.target.value)}
-      />
+        <input
+          type="file"
+          onChange={(e) => setImageFile(e.target.files[0])}
+          style={{ marginTop: "10px" }}
+        />
 
-      {/* DESCRIPTION */}
-      <TextField
-        fullWidth
-        label="Description"
-        multiline
-        rows={3}
-        sx={{ mb: 2 }}
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-      />
-
-      {/* CATEGORY */}
-      <TextField
-        select
-        label="Category"
-        fullWidth
-        value={category}
-        onChange={(e) => setCategory(e.target.value)}
-        sx={{ mb: 2 }}
-      >
-        {categories.map((cat) => (
-          <MenuItem key={cat.id} value={cat.slug}>
-            {cat.name}
-          </MenuItem>
-        ))}
-      </TextField>
-
-      {/* IMAGE */}
-      <input
-        type="file"
-        onChange={handleImageChange}
-        style={{ marginTop: "10px" }}
-      />
-
-      {/* SUBMIT */}
-      <Button
-        fullWidth
-        sx={{ mt: 2 }}
-        variant="contained"
-        onClick={handleSubmit}
-        disabled={loading}
-      >
-        {loading ? "Posting..." : "Create Product"}
-      </Button>
-    </Paper>
-  </Box>
-);
+        <Button
+          fullWidth
+          sx={{ mt: 2 }}
+          variant="contained"
+          onClick={handleSubmit}
+          disabled={loading}
+        >
+          {loading ? "Posting..." : "Create Product"}
+        </Button>
+      </Paper>
+    </Box>
+  );
 };
 
 export default CreatePost;
