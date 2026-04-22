@@ -1,68 +1,125 @@
 import React from "react";
-import {
-  Card,
-  CardMedia,
-  CardContent,
-  Typography,
-  Button,
-  Box,
-} from "@mui/material";
+import { Card, CardMedia, Typography, Box, Button } from "@mui/material";
+import { motion } from "framer-motion";
 
 const ProductCard = ({ name, price, image, seller, onBuyNow }) => {
   const imageUrl =
-    image?.startsWith("http")
-      ? image
-      : image
-      ? image
-      : "/placeholder.png";
+    image?.startsWith("http") ? image : image ? image : "/placeholder.png";
 
   return (
-    <Card
-      sx={{
-        width: "100%",
-        borderRadius: 3,
-        overflow: "hidden",
-        display: "flex",
-        flexDirection: "column",
-        boxShadow: 2,
-        transition: "0.3s",
-        "&:hover": { transform: "scale(1.02)" },
-      }}
-    >
-      <Box sx={{ position: "relative", width: "100%", pt: "100%" }}>
-        <CardMedia
-          component="img"
-          image={imageUrl}
+    <motion.div whileHover={{ y: -6 }} transition={{ duration: 0.2 }}>
+      <Card
+        sx={{
+          width: "100%",
+          borderRadius: "16px",
+          overflow: "hidden",
+          background: "rgba(17, 24, 39, 0.8)",
+          backdropFilter: "blur(10px)",
+          border: "1px solid rgba(255,255,255,0.06)",
+          boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
+          display: "flex",
+          flexDirection: "column",
+          transition: "0.3s",
+          "&:hover": {
+            boxShadow: "0 15px 40px rgba(0,0,0,0.6)",
+          },
+        }}
+      >
+        {/* IMAGE SECTION */}
+        <Box
           sx={{
-            position: "absolute",
+            position: "relative",
             width: "100%",
-            height: "100%",
-            top: 0,
-            objectFit: "cover",
+            pt: "100%",
+            overflow: "hidden",
           }}
-        />
-      </Box>
+        >
+          <motion.div whileHover={{ scale: 1.05 }}>
+            <CardMedia
+              component="img"
+              image={imageUrl}
+              sx={{
+                position: "absolute",
+                width: "100%",
+                height: "100%",
+                top: 0,
+                objectFit: "cover",
+              }}
+            />
+          </motion.div>
 
-      <CardContent>
-        <Typography noWrap fontWeight="700">
-          {name}
-        </Typography>
+          {/* subtle overlay */}
+          <Box
+            sx={{
+              position: "absolute",
+              inset: 0,
+              background:
+                "linear-gradient(to top, rgba(0,0,0,0.4), transparent)",
+            }}
+          />
+        </Box>
 
-        <Typography variant="caption" color="text.secondary">
-          {seller}
-        </Typography>
+        {/* CONTENT */}
+        <Box sx={{ p: 1.5 }}>
+          <Typography
+            noWrap
+            sx={{
+              fontWeight: 700,
+              fontSize: "0.95rem",
+              color: "white",
+            }}
+          >
+            {name}
+          </Typography>
 
-        <Typography fontWeight="800" color="green" mt={1}>
-          ₦{Number(price).toLocaleString()}
-        </Typography>
-      </CardContent>
+          <Typography
+            variant="caption"
+            sx={{
+              color: "rgba(255,255,255,0.5)",
+              display: "block",
+              mt: 0.3,
+            }}
+          >
+            {seller}
+          </Typography>
 
-      <Box p={1.5}>
-        <Button fullWidth variant="contained" onClick={onBuyNow}>
-          Buy Now
-        </Button>
-      </Box>
-    </Card>
+          <Typography
+            sx={{
+              mt: 1,
+              fontWeight: 800,
+              fontSize: "1rem",
+              color: "#60a5fa",
+            }}
+          >
+            ₦{Number(price).toLocaleString()}
+          </Typography>
+        </Box>
+
+        {/* ACTION */}
+        <Box sx={{ px: 1.5, pb: 1.5 }}>
+          <motion.div whileTap={{ scale: 0.97 }}>
+            <Button
+              fullWidth
+              onClick={onBuyNow}
+              sx={{
+                textTransform: "none",
+                borderRadius: "10px",
+                background: "rgba(37, 99, 235, 0.9)",
+                color: "white",
+                fontWeight: 600,
+                fontSize: "0.85rem",
+                py: 1,
+                "&:hover": {
+                  background: "#2563eb",
+                },
+              }}
+            >
+              View Product
+            </Button>
+          </motion.div>
+        </Box>
+      </Card>
+    </motion.div>
   );
 };
 

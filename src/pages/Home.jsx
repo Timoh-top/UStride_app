@@ -11,8 +11,12 @@ import {
   Button,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import ProductCard from "../components/ProductCard";
 import API_BASE_URL from "../api";
+
+const MotionBox = motion(Box);
+const MotionGrid = motion(Grid);
 
 const Home = () => {
   const [products, setProducts] = useState([]);
@@ -55,7 +59,7 @@ const Home = () => {
   const categories = ["All", "Food", "Fashion", "Gadgets", "Academics", "Skills"];
 
   const SkeletonCard = () => (
-    <Card sx={{ borderRadius: 3 }}>
+    <Card sx={{ borderRadius: 3, bgcolor: "#111827" }}>
       <Skeleton variant="rectangular" height={160} />
       <CardContent>
         <Skeleton width="70%" />
@@ -65,55 +69,110 @@ const Home = () => {
   );
 
   return (
-    <Box sx={{ width: "100%", bgcolor: "#f4f6f8", overflowX: "hidden" }}>
-
+    <Box
+      sx={{
+        minHeight: "100vh",
+        bgcolor: "#0b0f17",
+        color: "white",
+      }}
+    >
       {/* HERO */}
-      <Box
+      <MotionBox
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
         sx={{
-          px: { xs: 2, md: 8 },
-          py: { xs: 4, md: 6 },
-          background: "linear-gradient(135deg, #111827, #1f2937)",
-          color: "white",
+          px: { xs: 2, md: 10 },
+          py: { xs: 6, md: 8 },
+          background: "radial-gradient(circle at top, #1f2937, #0b0f17)",
+          borderBottom: "1px solid rgba(255,255,255,0.05)",
         }}
       >
         <Typography
           fontWeight="800"
-          sx={{ fontSize: { xs: "1.5rem", md: "2.2rem" } }}
+          sx={{
+            fontSize: { xs: "1.8rem", md: "3rem" },
+            letterSpacing: "-1px",
+          }}
         >
-          Discover, Buy & Sell Anything
+          Your Campus Marketplace
         </Typography>
 
-        <Typography sx={{ mt: 1, opacity: 0.8, maxWidth: 500 }}>
-          Your campus marketplace
+        <Typography sx={{ mt: 1, opacity: 0.6, maxWidth: 500 }}>
+          Buy. Sell. Offer skills. Everything you need — in one place.
         </Typography>
 
-        <Stack direction="row" spacing={2} mt={3} flexWrap="wrap">
-          <Button variant="contained" onClick={() => navigate("/dashboard")}>
-            Start Selling
-          </Button>
+        <Stack direction="row" spacing={2} mt={4}>
+          <motion.div whileHover={{ scale: 1.05 }}>
+            <Button
+              variant="contained"
+              onClick={() => navigate("/dashboard")}
+              sx={{
+                bgcolor: "#2563eb",
+                borderRadius: "12px",
+                textTransform: "none",
+              }}
+            >
+              Start Selling
+            </Button>
+          </motion.div>
+
+          <motion.div whileHover={{ scale: 1.05 }}>
+            <Button
+              variant="outlined"
+              onClick={() => navigate("/home")}
+              sx={{
+                borderColor: "rgba(255,255,255,0.2)",
+                color: "white",
+                borderRadius: "12px",
+                textTransform: "none",
+              }}
+            >
+              Explore
+            </Button>
+          </motion.div>
         </Stack>
-      </Box>
+      </MotionBox>
 
       {/* BODY */}
-      <Box sx={{ px: { xs: 1.5, md: 6 }, py: 4 }}>
+      <Box sx={{ px: { xs: 2, md: 10 }, py: 5 }}>
 
         {/* CATEGORIES */}
-        <Stack direction="row" spacing={1} sx={{ mb: 3, overflowX: "auto" }}>
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{
+            mb: 4,
+            overflowX: "auto",
+            pb: 1,
+          }}
+        >
           {categories.map((cat, i) => (
-            <Chip key={i} label={cat} clickable />
+            <motion.div
+              key={i}
+              whileHover={{ scale: 1.08 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Chip
+                label={cat}
+                sx={{
+                  bgcolor: "rgba(255,255,255,0.05)",
+                  color: "white",
+                  borderRadius: "10px",
+                  px: 1,
+                }}
+                clickable
+              />
+            </motion.div>
           ))}
         </Stack>
 
-        <Typography fontWeight="800" mb={2}>
+        <Typography fontWeight="700" mb={3} sx={{ opacity: 0.8 }}>
           🔥 Trending Products
         </Typography>
 
-        {/* GRID FIXED */}
-        <Grid
-          container
-          spacing={2}
-          columns={12}
-        >
+        {/* GRID */}
+        <Grid container spacing={2}>
           {loading &&
             Array.from({ length: 8 }).map((_, i) => (
               <Grid item xs={6} sm={4} md={3} key={i}>
@@ -123,26 +182,37 @@ const Home = () => {
 
           {!loading &&
             !error &&
-            products.map((product) => (
-              <Grid item xs={6} sm={4} md={3} key={product.id}>
-                <ProductCard
-                  name={product.name}
-                  price={product.price}
-                  image={
-                    product.image
-                      ? product.image.startsWith("http")
-                        ? product.image
-                        : `${API_BASE_URL}${product.image}`
-                      : "/placeholder.png"
-                  }
-                  seller={
-                    typeof product.vendor === "object"
-                      ? product.vendor.username
-                      : product.vendor
-                  }
-                  onBuyNow={() => navigate(`/product/${product.id}`)}
-                />
-              </Grid>
+            products.map((product, index) => (
+              <MotionGrid
+                item
+                xs={6}
+                sm={4}
+                md={3}
+                key={product.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
+              >
+                <motion.div whileHover={{ y: -6 }}>
+                  <ProductCard
+                    name={product.name}
+                    price={product.price}
+                    image={
+                      product.image
+                        ? product.image.startsWith("http")
+                          ? product.image
+                          : `${API_BASE_URL}${product.image}`
+                        : "/placeholder.png"
+                    }
+                    seller={
+                      typeof product.vendor === "object"
+                        ? product.vendor.username
+                        : product.vendor
+                    }
+                    onBuyNow={() => navigate(`/product/${product.id}`)}
+                  />
+                </motion.div>
+              </MotionGrid>
             ))}
         </Grid>
       </Box>
