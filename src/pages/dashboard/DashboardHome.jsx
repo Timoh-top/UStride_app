@@ -1,36 +1,45 @@
 import React from "react";
-import { Box, Typography, Card, Grid } from "@mui/material";
 
 const DashboardHome = () => {
   return (
-    <Box>
-      <Typography variant="h5" fontWeight="bold" mb={2}>
-        Dashboard Overview
-      </Typography>
+    <div className="space-y-6">
 
-      <Grid container spacing={2}>
-        <Grid item xs={12} sm={6} md={4}>
-          <Card sx={{ p: 2 }}>
-            <h3>Total Products</h3>
-            <h2>12</h2>
-          </Card>
-        </Grid>
+      {/* HEADER */}
+      <div>
+        <h1 className="text-2xl font-bold text-white">
+          Dashboard Overview
+        </h1>
+        <p className="text-gray-400 text-sm">
+          Track your store performance in real time
+        </p>
+      </div>
 
-        <Grid item xs={12} sm={6} md={4}>
-          <Card sx={{ p: 2 }}>
-            <h3>Orders</h3>
-            <h2>5</h2>
-          </Card>
-        </Grid>
+      {/* STATS GRID */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 
-        <Grid item xs={12} sm={6} md={4}>
-          <Card sx={{ p: 2 }}>
-            <h3>Revenue</h3>
-            <h2>₦0</h2>
-          </Card>
-        </Grid>
-      </Grid>
-    </Box>
+        {/* CARD 1 */}
+        <div className="bg-gray-900 rounded-2xl p-5 border border-gray-800 hover:border-gray-700 transition">
+          <p className="text-gray-400 text-sm">Total Products</p>
+          <h2 className="text-3xl font-bold mt-2 text-white">12</h2>
+        </div>
+
+        {/* CARD 2 */}
+        <div className="bg-gray-900 rounded-2xl p-5 border border-gray-800 hover:border-gray-700 transition">
+          <p className="text-gray-400 text-sm">Orders</p>
+          <h2 className="text-3xl font-bold mt-2 text-white">5</h2>
+        </div>
+
+        {/* CARD 3 */}
+        <div className="bg-gray-900 rounded-2xl p-5 border border-gray-800 hover:border-gray-700 transition">
+          <p className="text-gray-400 text-sm">Revenue</p>
+          <h2 className="text-3xl font-bold mt-2 text-green-400">
+            ₦0
+          </h2>
+        </div>
+
+      </div>
+
+    </div>
   );
 };
 

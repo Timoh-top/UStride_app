@@ -1,127 +1,92 @@
 import React from "react";
-import {
-  Box,
-  Typography,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Divider,
-  Paper,
-} from "@mui/material";
-
-import DashboardIcon from "@mui/icons-material/Dashboard";
-import Inventory2Icon from "@mui/icons-material/Inventory2";
-import AddCircleIcon from "@mui/icons-material/AddCircle";
-import SettingsIcon from "@mui/icons-material/Settings";
-import TrendingUpIcon from "@mui/icons-material/TrendingUp";
-
 import { useNavigate } from "react-router-dom";
+
+import {
+  LayoutDashboard,
+  Package,
+  PlusCircle,
+  TrendingUp,
+  Settings,
+} from "lucide-react";
 
 const VendorSidebar = () => {
   const navigate = useNavigate();
 
+  const navItems = [
+    {
+      label: "Overview",
+      icon: <LayoutDashboard size={18} />,
+      path: "/dashboard/vendor",
+    },
+    {
+      label: "My Products",
+      icon: <Package size={18} />,
+      path: "/dashboard/vendor/products",
+    },
+    {
+      label: "Create Product",
+      icon: <PlusCircle size={18} />,
+      path: "/product/create",
+      highlight: true,
+    },
+    {
+      label: "Sales",
+      icon: <TrendingUp size={18} />,
+      path: "/dashboard/vendor/sales",
+    },
+    {
+      label: "Settings",
+      icon: <Settings size={18} />,
+      path: "/profile",
+    },
+  ];
+
   return (
-    <Paper
-      elevation={0}
-      sx={{
-        height: "100vh",
-        width: 260,
-        borderRight: "1px solid #eee",
-        background: "linear-gradient(180deg, #ffffff 0%, #f9fafc 100%)",
-        display: "flex",
-        flexDirection: "column",
-        py: 2,
-      }}
-    >
+    <div className="h-screen w-64 bg-white border-r border-gray-100 flex flex-col py-5 shadow-sm">
+      
       {/* BRAND */}
-      <Box sx={{ px: 2, mb: 2 }}>
-        <Typography
-          sx={{
-            fontWeight: "bold",
-            fontSize: 18,
-            background: "linear-gradient(90deg,#2563eb,#7c3aed)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-          }}
-        >
+      <div className="px-4 mb-5">
+        <h1 className="text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
           Vendor Studio
-        </Typography>
-
-        <Typography sx={{ fontSize: 12, color: "gray" }}>
+        </h1>
+        <p className="text-xs text-gray-500 mt-1">
           Manage your products & sales
-        </Typography>
-      </Box>
+        </p>
+      </div>
 
-      <Divider />
+      <div className="border-t border-gray-100" />
 
-      {/* MAIN NAV */}
-      <List sx={{ mt: 1 }}>
-        <ListItem disablePadding>
-          <ListItemButton onClick={() => navigate("/dashboard/vendor")}>
-            <ListItemIcon>
-              <DashboardIcon />
-            </ListItemIcon>
-            <ListItemText primary="Overview" />
-          </ListItemButton>
-        </ListItem>
-
-        <ListItem disablePadding>
-          <ListItemButton onClick={() => navigate("/dashboard/vendor/products")}>
-            <ListItemIcon>
-              <Inventory2Icon />
-            </ListItemIcon>
-            <ListItemText primary="My Products" />
-          </ListItemButton>
-        </ListItem>
-
-        {/* CREATE PRODUCT (HIGHLIGHTED) */}
-        <ListItem disablePadding>
-          <ListItemButton
-            onClick={() => navigate("/post/create")}
-            sx={{
-              backgroundColor: "#2563eb",
-              color: "white",
-              borderRadius: 2,
-              mx: 1,
-              my: 1,
-              "&:hover": {
-                backgroundColor: "#1d4ed8",
-              },
-            }}
+      {/* NAV ITEMS */}
+      <div className="flex flex-col gap-1 mt-3 px-2">
+        {navItems.map((item) => (
+          <button
+            key={item.label}
+            onClick={() => navigate(item.path)}
+            className={`
+              flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition
+              hover:bg-gray-100
+              ${item.highlight
+                ? "bg-blue-600 text-white hover:bg-blue-700"
+                : "text-gray-700"}
+            `}
           >
-            <ListItemIcon sx={{ color: "white" }}>
-              <AddCircleIcon />
-            </ListItemIcon>
-            <ListItemText primary="Create Product" />
-          </ListItemButton>
-        </ListItem>
+            {item.icon}
+            {item.label}
+          </button>
+        ))}
+      </div>
 
-        <ListItem disablePadding>
-          <ListItemButton onClick={() => navigate("/dashboard/vendor/sales")}>
-            <ListItemIcon>
-              <TrendingUpIcon />
-            </ListItemIcon>
-            <ListItemText primary="Sales" />
-          </ListItemButton>
-        </ListItem>
-      </List>
-
-      <Divider sx={{ mt: "auto" }} />
-
-      {/* SETTINGS */}
-      <List>
-        <ListItem disablePadding>
-          <ListItemButton onClick={() => navigate("/profile")}>
-            <ListItemIcon>
-              <SettingsIcon />
-            </ListItemIcon>
-            <ListItemText primary="Settings" />
-          </ListItemButton>
-        </ListItem>
-      </List>
-    </Paper>
+      {/* FOOTER */}
+      <div className="mt-auto border-t border-gray-100 px-2 pt-3">
+        <button
+          onClick={() => navigate("/profile")}
+          className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-100 w-full"
+        >
+          <Settings size={18} />
+          Settings
+        </button>
+      </div>
+    </div>
   );
 };
 

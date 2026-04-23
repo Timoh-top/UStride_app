@@ -1,14 +1,4 @@
 import React, { useState, useEffect } from "react";
-import {
-  Box,
-  Typography,
-  TextField,
-  Button,
-  Paper,
-  MenuItem,
-  CircularProgress,
-} from "@mui/material";
-
 import { useNavigate } from "react-router-dom";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
@@ -28,9 +18,7 @@ const CreateProduct = () => {
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const token = localStorage.getItem("token");
-
-  // ================= FETCH CATEGORIES =================
+  // FETCH CATEGORIES
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -45,7 +33,6 @@ const CreateProduct = () => {
     fetchCategories();
   }, []);
 
-  // ================= HANDLE INPUT =================
   const handleChange = (e) => {
     setForm((prev) => ({
       ...prev,
@@ -53,7 +40,6 @@ const CreateProduct = () => {
     }));
   };
 
-  // ================= IMAGE PREVIEW =================
   const handleImage = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -62,9 +48,10 @@ const CreateProduct = () => {
     setPreview(URL.createObjectURL(file));
   };
 
-  // ================= SUBMIT =================
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const token = localStorage.getItem("token");
 
     if (!token) {
       alert("You are not logged in");
@@ -81,15 +68,12 @@ const CreateProduct = () => {
 
     try {
       const formData = new FormData();
-
       formData.append("name", form.name);
       formData.append("description", form.description);
       formData.append("price", form.price);
       formData.append("category", form.category);
 
-      if (image) {
-        formData.append("image", image);
-      }
+      if (image) formData.append("image", image);
 
       const res = await fetch(`${API_BASE_URL}/api/products/`, {
         method: "POST",
@@ -99,147 +83,108 @@ const CreateProduct = () => {
         body: formData,
       });
 
-      if (!res.ok) {
-        const errText = await res.text();
-        throw new Error(errText);
-      }
+      const data = await res.json();
 
-      alert("Product created successfully 🎉");
+      if (!res.ok) throw new Error(data?.detail || "Failed");
+
+      alert("Product created 🎉");
       navigate("/dashboard/vendor");
     } catch (err) {
-      console.log("Create product error:", err);
-      alert("Error creating product");
+      alert(err.message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        background: "#f6f7fb",
-        p: 2,
-      }}
-    >
-      <Paper sx={{ p: 4, width: "100%", maxWidth: 500, borderRadius: 3 }}>
-        <Typography variant="h5" fontWeight="bold">
-          Create Product
-        </Typography>
+    <div className="min-h-screen flex items-center justify-center bg-gray-950 px-4">
+      <div className="w-full max-w-xl bg-gray-900 text-white rounded-2xl shadow-xl p-6">
 
-        <Typography sx={{ color: "gray", mb: 3 }}>
-          Add a new product to your store
-        </Typography>
+        {/* HEADER */}
+        <h1 className="text-2xl font-bold">Create Product</h1>
+        <p className="text-gray-400 text-sm mb-6">
+          Add a new product to your marketplace
+        </p>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="space-y-4">
+
           {/* NAME */}
-          <TextField
-            label="Product Name"
+          <input
             name="name"
-            fullWidth
-            required
-            margin="normal"
+            placeholder="Product name"
             value={form.name}
             onChange={handleChange}
+            className="w-full p-3 rounded-xl bg-gray-800 outline-none focus:ring-2 focus:ring-blue-500"
           />
 
           {/* DESCRIPTION */}
-          <TextField
-            label="Description"
+          <textarea
             name="description"
-            fullWidth
-            multiline
-            rows={3}
-            margin="normal"
+            placeholder="Description"
             value={form.description}
             onChange={handleChange}
+            className="w-full p-3 rounded-xl bg-gray-800 outline-none focus:ring-2 focus:ring-blue-500"
+            rows={3}
           />
 
           {/* PRICE */}
-          <TextField
-            label="Price"
+          <input
             name="price"
             type="number"
-            fullWidth
-            required
-            margin="normal"
+            placeholder="Price"
             value={form.price}
             onChange={handleChange}
+            className="w-full p-3 rounded-xl bg-gray-800 outline-none focus:ring-2 focus:ring-blue-500"
           />
 
-          {/* CATEGORY (DYNAMIC FIX) */}
-          <TextField
-            select
-            label="Category"
+          {/* CATEGORY */}
+          <select
             name="category"
-            fullWidth
-            required
-            margin="normal"
             value={form.category}
             onChange={handleChange}
+            className="w-full p-3 rounded-xl bg-gray-800 outline-none focus:ring-2 focus:ring-blue-500"
           >
-            {categories.length === 0 ? (
-              <MenuItem disabled>Loading categories...</MenuItem>
-            ) : (
-              categories.map((cat) => (
-                <MenuItem key={cat.id} value={cat.id}>
-                  {cat.name}
-                </MenuItem>
-              ))
-            )}
-          </TextField>
+            <option value="">Select category</option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.slug}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
 
-          {/* IMAGE UPLOAD */}
-          <Button
-            variant="outlined"
-            component="label"
-            fullWidth
-            sx={{ mt: 2, mb: 2 }}
-          >
-            Upload Product Image
+          {/* IMAGE */}
+          <label className="block w-full cursor-pointer">
+            <div className="p-3 bg-gray-800 rounded-xl text-center hover:bg-gray-700">
+              Upload Product Image
+            </div>
             <input
               type="file"
               hidden
               accept="image/*"
               onChange={handleImage}
             />
-          </Button>
+          </label>
 
           {/* PREVIEW */}
           {preview && (
-            <Box
-              component="img"
+            <img
               src={preview}
-              sx={{
-                width: "100%",
-                height: 180,
-                objectFit: "cover",
-                borderRadius: 2,
-                mb: 2,
-              }}
+              alt="preview"
+              className="w-full h-48 object-cover rounded-xl"
             />
           )}
 
-          {/* SUBMIT */}
-          <Button
+          {/* BUTTON */}
+          <button
             type="submit"
-            fullWidth
-            variant="contained"
             disabled={loading}
-            sx={{ mt: 2, py: 1.5, borderRadius: 2 }}
+            className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 transition font-semibold"
           >
-            {loading ? (
-              <CircularProgress size={22} />
-            ) : (
-              "Create Product"
-            )}
-          </Button>
+            {loading ? "Creating..." : "Create Product"}
+          </button>
         </form>
-      </Paper>
-    </Box>
+      </div>
+    </div>
   );
 };
 

@@ -1,13 +1,4 @@
 import React, { useState } from "react";
-import {
-  Box,
-  Typography,
-  Avatar,
-  TextField,
-  Button,
-  Paper,
-  CircularProgress,
-} from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
 const API = import.meta.env.VITE_API_URL;
@@ -21,9 +12,6 @@ const ProfileEdit = () => {
 
   const navigate = useNavigate();
 
-  // =========================
-  // IMAGE HANDLER
-  // =========================
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -32,9 +20,6 @@ const ProfileEdit = () => {
     }
   };
 
-  // =========================
-  // SAVE PROFILE
-  // =========================
   const handleSave = async () => {
     setLoading(true);
 
@@ -54,26 +39,22 @@ const ProfileEdit = () => {
         formData.append("profile_picture", imageFile);
       }
 
-      const response = await fetch(`${API}/api/profile/`, {
-        method: "PUT", // or PATCH depending on backend
+      const res = await fetch(`${API}/api/profile/`, {
+        method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
         },
         body: formData,
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to update profile");
-      }
+      if (!res.ok) throw new Error("Failed to update profile");
 
-      const data = await response.json();
-      console.log("Updated profile:", data);
+      await res.json();
 
       alert("Profile updated successfully!");
       navigate("/profile");
-
-    } catch (error) {
-      console.log(error);
+    } catch (err) {
+      console.log(err);
       alert("Error updating profile");
     }
 
@@ -81,82 +62,72 @@ const ProfileEdit = () => {
   };
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        minHeight: "80vh",
-        px: 2,
-      }}
-    >
-      <Paper
-        elevation={5}
-        sx={{
-          p: 4,
-          width: "100%",
-          maxWidth: 450,
-          borderRadius: 3,
-          textAlign: "center",
-        }}
-      >
-        {/* Avatar Preview */}
-        <Avatar
-          src={preview}
-          sx={{
-            width: 90,
-            height: 90,
-            margin: "0 auto",
-            mb: 2,
-          }}
-        />
+    <div className="min-h-screen bg-black text-white flex items-center justify-center px-4">
 
-        {/* Upload Button */}
-        <Button variant="contained" component="label" sx={{ mb: 2 }}>
-          Upload Picture
+      <div className="w-full max-w-md bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-lg">
+
+        {/* TITLE */}
+        <h1 className="text-xl font-bold text-center mb-6">
+          Edit Profile
+        </h1>
+
+        {/* AVATAR PREVIEW */}
+        <div className="flex justify-center mb-4">
+          <img
+            src={preview || "https://via.placeholder.com/100"}
+            alt="preview"
+            className="w-24 h-24 rounded-full object-cover border border-gray-700"
+          />
+        </div>
+
+        {/* UPLOAD */}
+        <label className="block text-center mb-4">
+          <span className="inline-block px-4 py-2 bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-700 transition">
+            Upload Picture
+          </span>
+
           <input
-            hidden
             type="file"
             accept="image/*"
             onChange={handleImageChange}
+            className="hidden"
           />
-        </Button>
+        </label>
 
-        {/* Name */}
-        <TextField
-          fullWidth
-          label="Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          sx={{ mb: 2 }}
-        />
+        {/* NAME */}
+        <div className="mb-4">
+          <label className="text-sm text-gray-400">Name</label>
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="w-full mt-1 px-4 py-3 rounded-lg bg-gray-800 border border-gray-700 focus:outline-none focus:border-blue-500"
+            placeholder="Enter your name"
+          />
+        </div>
 
-        {/* Bio */}
-        <TextField
-          fullWidth
-          label="Short Bio"
-          multiline
-          rows={3}
-          value={bio}
-          onChange={(e) => setBio(e.target.value)}
-          sx={{ mb: 2 }}
-        />
+        {/* BIO */}
+        <div className="mb-4">
+          <label className="text-sm text-gray-400">Bio</label>
+          <textarea
+            value={bio}
+            onChange={(e) => setBio(e.target.value)}
+            rows={3}
+            className="w-full mt-1 px-4 py-3 rounded-lg bg-gray-800 border border-gray-700 focus:outline-none focus:border-blue-500"
+            placeholder="Tell us about yourself"
+          />
+        </div>
 
-        {/* Save Button */}
-        <Button
-          variant="contained"
-          fullWidth
+        {/* SAVE BUTTON */}
+        <button
           onClick={handleSave}
           disabled={loading}
+          className="w-full py-3 rounded-lg bg-blue-600 hover:bg-blue-500 transition font-semibold"
         >
-          {loading ? (
-            <CircularProgress size={24} sx={{ color: "white" }} />
-          ) : (
-            "Save Profile"
-          )}
-        </Button>
-      </Paper>
-    </Box>
+          {loading ? "Saving..." : "Save Profile"}
+        </button>
+
+      </div>
+    </div>
   );
 };
 

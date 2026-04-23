@@ -1,11 +1,4 @@
 import React, { useState } from "react";
-import {
-  Box,
-  TextField,
-  Button,
-  Typography,
-  Paper,
-} from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
@@ -23,10 +16,10 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [e.target.name]: e.target.value,
-    });
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -54,10 +47,9 @@ const Register = () => {
 
       setTimeout(() => {
         navigate("/login");
-      }, 1200);
-
+      }, 1000);
     } catch (error) {
-      console.log("Register error:", error);
+      console.log(error);
       toast.error("Network error. Try again.");
     }
 
@@ -65,80 +57,73 @@ const Register = () => {
   };
 
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: "#f5f5f5",
-        px: 2,
-      }}
-    >
-      <Paper sx={{ p: 4, maxWidth: 400, width: "100%", borderRadius: 3 }}>
-        <Typography variant="h5" textAlign="center" mb={3}>
+    <div className="min-h-screen flex items-center justify-center bg-[#0b0f17] px-4">
+      
+      {/* Card */}
+      <div className="w-full max-w-md bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl">
+        
+        {/* Header */}
+        <h1 className="text-2xl font-bold text-white text-center">
           Create Account
-        </Typography>
+        </h1>
+        <p className="text-gray-400 text-sm text-center mt-2">
+          Join your campus marketplace
+        </p>
 
-        <form onSubmit={handleSubmit}>
-          <TextField
-            label="Username"
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+
+          <input
+            type="text"
             name="username"
-            fullWidth
-            margin="normal"
+            placeholder="Username"
             value={formData.username}
             onChange={handleChange}
+            className="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 text-white outline-none focus:border-blue-500"
             required
           />
 
-          <TextField
-            label="Email"
-            name="email"
+          <input
             type="email"
-            fullWidth
-            margin="normal"
+            name="email"
+            placeholder="Email"
             value={formData.email}
             onChange={handleChange}
+            className="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 text-white outline-none focus:border-blue-500"
             required
           />
 
-          <TextField
-            label="Password"
-            name="password"
+          <input
             type="password"
-            fullWidth
-            margin="normal"
+            name="password"
+            placeholder="Password"
             value={formData.password}
             onChange={handleChange}
+            className="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 text-white outline-none focus:border-blue-500"
             required
           />
 
-          <Button
+          <button
             type="submit"
-            variant="contained"
-            fullWidth
-            sx={{ mt: 2 }}
             disabled={loading}
+            className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold transition disabled:opacity-50"
           >
-            {loading ? "Creating..." : "Register"}
-          </Button>
+            {loading ? "Creating..." : "Create Account"}
+          </button>
         </form>
 
-        <Typography sx={{ mt: 2, textAlign: "center" }}>
+        {/* Footer */}
+        <p className="text-center text-gray-400 text-sm mt-5">
           Already have an account?{" "}
           <span
-            style={{
-              color: "#1976d2",
-              cursor: "pointer",
-              fontWeight: "bold",
-            }}
             onClick={() => navigate("/login")}
+            className="text-blue-400 cursor-pointer font-semibold hover:underline"
           >
             Sign in
           </span>
-        </Typography>
-      </Paper>
-    </Box>
+        </p>
+      </div>
+    </div>
   );
 };
 

@@ -1,53 +1,79 @@
-import React, { useEffect, useState } from "react";
-import {
-  Box,
-  Grid,
-  Typography,
-  Skeleton,
-  Card,
-  CardContent,
-  Stack,
-  Chip,
-  Button,
-} from "@mui/material";
-import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import React, { useState, useEffect, useRef } from "react";
 import ProductCard from "../components/ProductCard";
 import API_BASE_URL from "../api";
 
-const MotionBox = motion(Box);
-const MotionGrid = motion(Grid);
-
-const Home = () => {
-  const [products, setProducts] = useState([]);
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  const navigate = useNavigate();
+// ==========================
+// SCROLL HOOK
+// ==========================
+const useInView = (threshold = 0.15) => {
+  const ref = useRef(null);
+  const [inView, setInView] = useState(false);
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      setLoading(true);
+    const obs = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting) setInView(true);
+      },
+      { threshold }
+    );
 
+    if (ref.current) obs.observe(ref.current);
+
+    return () => obs.disconnect();
+  }, [threshold]);
+
+  return [ref, inView];
+};
+
+// ==========================
+// DATA
+// ==========================
+const categories = [
+  { icon: "📚", label: "Textbooks" },
+  { icon: "💻", label: "Electronics" },
+  { icon: "🎒", label: "Supplies" },
+  { icon: "🏠", label: "Dorm Essentials" },
+  { icon: "👕", label: "Campus Merch" },
+  { icon: "🎵", label: "Instruments" },
+  { icon: "🛠️", label: "Services" },
+];
+
+// ==========================
+// HOME COMPONENT
+// ==========================
+const Home = () => {
+  const [products, setProducts] = useState([]);
+  const [activeCategory, setActiveCategory] = useState("All");
+  const [loading, setLoading] = useState(true);
+
+  const [discoverRef, discoverInView] = useInView();
+
+  // ==========================
+  // FETCH PRODUCTS (FIXED)
+  // ==========================
+  useEffect(() => {
+    const fetchProducts = async () => {
       try {
         const token = localStorage.getItem("token");
 
         const res = await fetch(`${API_BASE_URL}/api/products/`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
+          headers: token
+            ? { Authorization: `Bearer ${token}` }
+            : {},
         });
 
-        if (res.status === 401) {
-          localStorage.removeItem("token");
-          window.location.href = "/login";
-          return;
-        }
-
-        if (!res.ok) throw new Error(await res.text());
-
         const data = await res.json();
-        setProducts(data);
+
+        // 🔥 SAFETY CHECK (PREVENT CRASH)
+        if (Array.isArray(data)) {
+          setProducts(data);
+        } else {
+          console.error("API did not return array:", data);
+          setProducts([]);
+        }
       } catch (err) {
-        setError("Failed to load products");
+        console.error("Fetch error:", err);
+        setProducts([]);
       } finally {
         setLoading(false);
       }
@@ -56,167 +82,179 @@ const Home = () => {
     fetchProducts();
   }, []);
 
-  const categories = ["All", "Food", "Fashion", "Gadgets", "Academics", "Skills"];
-
-  const SkeletonCard = () => (
-    <Card sx={{ borderRadius: 3, bgcolor: "#111827" }}>
-      <Skeleton variant="rectangular" height={160} />
-      <CardContent>
-        <Skeleton width="70%" />
-        <Skeleton width="40%" />
-      </CardContent>
-    </Card>
-  );
+  // ==========================
+  // FILTER
+  // ==========================
+  const filteredProducts =
+    activeCategory === "All"
+      ? products
+      : products.filter((p) => p.category === activeCategory);
 
   return (
-    <Box
-      sx={{
+    <div
+      style={{
+        background: "#0A0A0B",
+        color: "#F0EDE8",
         minHeight: "100vh",
-        bgcolor: "#0b0f17",
-        color: "white",
+        fontFamily: "sans-serif",
+        paddingBottom: 80,
       }}
     >
-      {/* HERO */}
-      <MotionBox
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        sx={{
-          px: { xs: 2, md: 10 },
-          py: { xs: 6, md: 8 },
-          background: "radial-gradient(circle at top, #1f2937, #0b0f17)",
-          borderBottom: "1px solid rgba(255,255,255,0.05)",
+      {/* ==========================
+          HERO
+      ========================== */}
+      <section style={{ padding: "40px 24px" }}>
+        <h1 style={{ fontSize: 28, fontWeight: 800 }}>
+          Everything students need on campus
+        </h1>
+        <p style={{ color: "rgba(240,237,232,0.6)", marginTop: 8 }}>
+          Buy, sell, and discover what’s happening around you.
+        </p>
+      </section>
+
+      {/* ==========================
+          CATEGORY ICONS
+      ========================== */}
+      <section style={{ padding: "0 24px" }}>
+        <div style={{ display: "flex", gap: 12, overflowX: "auto" }}>
+          <button
+            onClick={() => setActiveCategory("All")}
+            style={{
+              minWidth: 70,
+              height: 70,
+              borderRadius: 12,
+              border: "1px solid #333",
+              background:
+                activeCategory === "All" ? "#FF9500" : "#141416",
+              color: activeCategory === "All" ? "#000" : "#fff",
+              cursor: "pointer",
+            }}
+          >
+            All
+          </button>
+
+          {categories.map((cat) => (
+            <button
+              key={cat.label}
+              onClick={() => setActiveCategory(cat.label)}
+              style={{
+                minWidth: 70,
+                height: 70,
+                borderRadius: 12,
+                border: "1px solid #333",
+                background:
+                  activeCategory === cat.label
+                    ? "#FF9500"
+                    : "#141416",
+                color:
+                  activeCategory === cat.label ? "#000" : "#fff",
+                cursor: "pointer",
+              }}
+            >
+              <div style={{ fontSize: 20 }}>{cat.icon}</div>
+              <div style={{ fontSize: 10 }}>{cat.label}</div>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {/* ==========================
+          DISCOVER SECTION
+      ========================== */}
+      <section
+        ref={discoverRef}
+        style={{
+          padding: "50px 24px",
+          opacity: discoverInView ? 1 : 0,
+          transform: discoverInView
+            ? "translateY(0)"
+            : "translateY(30px)",
+          transition: "all 0.6s ease",
         }}
       >
-        <Typography
-          fontWeight="800"
-          sx={{
-            fontSize: { xs: "1.8rem", md: "3rem" },
-            letterSpacing: "-1px",
-          }}
-        >
-          Your Campus Marketplace
-        </Typography>
-
-        <Typography sx={{ mt: 1, opacity: 0.6, maxWidth: 500 }}>
-          Buy. Sell. Offer skills. Everything you need — in one place.
-        </Typography>
-
-        <Stack direction="row" spacing={2} mt={4}>
-          <motion.div whileHover={{ scale: 1.05 }}>
-            <Button
-              variant="contained"
-              onClick={() => navigate("/dashboard")}
-              sx={{
-                bgcolor: "#2563eb",
-                borderRadius: "12px",
-                textTransform: "none",
-              }}
-            >
-              Start Selling
-            </Button>
-          </motion.div>
-
-          <motion.div whileHover={{ scale: 1.05 }}>
-            <Button
-              variant="outlined"
-              onClick={() => navigate("/home")}
-              sx={{
-                borderColor: "rgba(255,255,255,0.2)",
-                color: "white",
-                borderRadius: "12px",
-                textTransform: "none",
-              }}
-            >
-              Explore
-            </Button>
-          </motion.div>
-        </Stack>
-      </MotionBox>
-
-      {/* BODY */}
-      <Box sx={{ px: { xs: 2, md: 10 }, py: 5 }}>
-
-        {/* CATEGORIES */}
-        <Stack
-          direction="row"
-          spacing={1}
-          sx={{
-            mb: 4,
-            overflowX: "auto",
-            pb: 1,
-          }}
-        >
-          {categories.map((cat, i) => (
-            <motion.div
-              key={i}
-              whileHover={{ scale: 1.08 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Chip
-                label={cat}
-                sx={{
-                  bgcolor: "rgba(255,255,255,0.05)",
-                  color: "white",
-                  borderRadius: "10px",
-                  px: 1,
-                }}
-                clickable
-              />
-            </motion.div>
-          ))}
-        </Stack>
-
-        <Typography fontWeight="700" mb={3} sx={{ opacity: 0.8 }}>
-          🔥 Trending Products
-        </Typography>
+        {/* HEADER */}
+        <div style={{ marginBottom: 20 }}>
+          <h2 style={{ fontSize: 22, fontWeight: 700 }}>
+            🔥 Discover new on campus
+          </h2>
+          <p style={{ color: "rgba(240,237,232,0.5)" }}>
+            Fresh listings from students around you
+          </p>
+        </div>
 
         {/* GRID */}
-        <Grid container spacing={2}>
-          {loading &&
-            Array.from({ length: 8 }).map((_, i) => (
-              <Grid item xs={6} sm={4} md={3} key={i}>
-                <SkeletonCard />
-              </Grid>
+        {loading ? (
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns:
+                "repeat(auto-fill, minmax(180px, 1fr))",
+              gap: 16,
+            }}
+          >
+            {[...Array(8)].map((_, i) => (
+              <div
+                key={i}
+                style={{
+                  height: 200,
+                  background: "#141416",
+                  borderRadius: 12,
+                  border: "1px solid #222",
+                  animation: "pulse 1.5s infinite",
+                }}
+              />
             ))}
+          </div>
+        ) : (
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns:
+                "repeat(auto-fill, minmax(180px, 1fr))",
+              gap: 16,
+            }}
+          >
+            {Array.isArray(filteredProducts) &&
+              filteredProducts.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  name={product.name}
+                  price={product.price}
+                  image={
+                    product.image?.startsWith("http")
+                      ? product.image
+                      : `https://res.cloudinary.com/dg2qpdukk/upload/${product.image}`
+                  }
+                  seller={
+                    typeof product.vendor === "object"
+                      ? product.vendor.username
+                      : product.vendor
+                  }
+                />
+              ))}
+          </div>
+        )}
+      </section>
 
-          {!loading &&
-            !error &&
-            products.map((product, index) => (
-              <MotionGrid
-                item
-                xs={6}
-                sm={4}
-                md={3}
-                key={product.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
-              >
-                <motion.div whileHover={{ y: -6 }}>
-                  <ProductCard
-                    name={product.name}
-                    price={product.price}
-                    image={
-                      product.image
-                        ? product.image.startsWith("http")
-                          ? product.image
-                          : `${API_BASE_URL}${product.image}`
-                        : "/placeholder.png"
-                    }
-                    seller={
-                      typeof product.vendor === "object"
-                        ? product.vendor.username
-                        : product.vendor
-                    }
-                    onBuyNow={() => navigate(`/product/${product.id}`)}
-                  />
-                </motion.div>
-              </MotionGrid>
-            ))}
-        </Grid>
-      </Box>
-    </Box>
+      {/* ==========================
+          FLOATING SELL BUTTON
+      ========================== */}
+      <button
+        style={{
+          position: "fixed",
+          bottom: 20,
+          right: 20,
+          background: "linear-gradient(#FF9500,#FF6B00)",
+          border: "none",
+          borderRadius: 16,
+          padding: "14px 20px",
+          fontWeight: 700,
+          cursor: "pointer",
+        }}
+      >
+        + Sell Item
+      </button>
+    </div>
   );
 };
 

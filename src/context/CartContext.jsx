@@ -9,28 +9,54 @@ export const useCart = () => {
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
 
+  // ADD ITEM
   const addToCart = (product) => {
-    const existing = cartItems.find((item) => item.id === product.id);
+    setCartItems((prev) => {
+      const existing = prev.find((item) => item.id === product.id);
 
-    if (existing) {
-      setCartItems(
-        cartItems.map((item) =>
+      if (existing) {
+        return prev.map((item) =>
           item.id === product.id
             ? { ...item, quantity: item.quantity + 1 }
             : item
-        )
-      );
-    } else {
-      setCartItems([...cartItems, { ...product, quantity: 1 }]);
-    }
+        );
+      }
+
+      return [...prev, { ...product, quantity: 1 }];
+    });
   };
 
+  // REMOVE ITEM COMPLETELY
   const removeFromCart = (id) => {
-    setCartItems(cartItems.filter((item) => item.id !== id));
+    setCartItems((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  // UPDATE QUANTITY (IMPORTANT FOR CART PAGE)
+  const updateQuantity = (id, quantity) => {
+    if (quantity <= 0) return;
+
+    setCartItems((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, quantity } : item
+      )
+    );
+  };
+
+  // CLEAR CART (AFTER PAYMENT)
+  const clearCart = () => {
+    setCartItems([]);
   };
 
   return (
-    <CartContext.Provider value={{ cartItems, addToCart, removeFromCart }}>
+    <CartContext.Provider
+      value={{
+        cartItems,
+        addToCart,
+        removeFromCart,
+        updateQuantity,
+        clearCart,
+      }}
+    >
       {children}
     </CartContext.Provider>
   );

@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { Box, Button, TextField, Typography } from "@mui/material";
 import StarSelector from "./StarSelector";
 import API_BASE_URL from "../api";
 
@@ -7,13 +6,15 @@ const ReviewForm = ({ productId, onReviewSubmitted }) => {
   const [rating, setRating] = useState(5);
   const [review, setReview] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const submitReview = async () => {
     if (!rating) {
-      alert("Please select rating");
+      setError("Please select a rating");
       return;
     }
 
+    setError("");
     setLoading(true);
 
     const token = localStorage.getItem("token");
@@ -27,59 +28,64 @@ const ReviewForm = ({ productId, onReviewSubmitted }) => {
         },
         body: JSON.stringify({
           product_id: productId,
-          rating: rating,
-          review: review,
+          rating,
+          review,
         }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        console.log("Backend error:", data);
         throw new Error(data.error || "Failed to submit review");
       }
 
       setRating(5);
       setReview("");
 
-      if (onReviewSubmitted) {
-        onReviewSubmitted();
-      }
+      if (onReviewSubmitted) onReviewSubmitted();
     } catch (err) {
-      console.log(err);
-      alert("Failed to submit review");
+      setError("Failed to submit review");
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
-    <Box sx={{ mt: 3 }}>
-      <Typography variant="h6">Write a Review</Typography>
+    <div className="mt-6 bg-white/5 border border-white/10 rounded-xl p-4 text-white">
 
-      <Box sx={{ mt: 1 }}>
+      {/* TITLE */}
+      <h2 className="text-lg font-semibold mb-3">
+        Write a Review
+      </h2>
+
+      {/* STARS */}
+      <div className="mb-3">
         <StarSelector rating={rating} setRating={setRating} />
-      </Box>
+      </div>
 
-      <TextField
-        fullWidth
-        multiline
-        rows={3}
-        sx={{ mt: 2 }}
-        placeholder="Write your review..."
+      {/* TEXTAREA */}
+      <textarea
+        className="w-full p-3 rounded-lg bg-gray-900 border border-white/10 text-white outline-none focus:border-blue-500"
+        rows="3"
+        placeholder="Share your experience..."
         value={review}
         onChange={(e) => setReview(e.target.value)}
       />
 
-      <Button
-        variant="contained"
-        sx={{ mt: 2 }}
+      {/* ERROR */}
+      {error && (
+        <p className="text-red-400 text-sm mt-2">{error}</p>
+      )}
+
+      {/* BUTTON */}
+      <button
         onClick={submitReview}
         disabled={loading}
+        className="w-full mt-3 bg-blue-600 hover:bg-blue-500 transition py-2 rounded-lg font-medium disabled:opacity-50"
       >
         {loading ? "Submitting..." : "Submit Review"}
-      </Button>
-    </Box>
+      </button>
+    </div>
   );
 };
 

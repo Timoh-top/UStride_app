@@ -1,14 +1,4 @@
 import React, { useEffect, useState } from "react";
-import {
-  Box,
-  Typography,
-  TextField,
-  Button,
-  Paper,
-  MenuItem,
-  CircularProgress,
-} from "@mui/material";
-
 import { useNavigate, useParams } from "react-router-dom";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
@@ -33,22 +23,13 @@ const EditProduct = () => {
 
   const token = localStorage.getItem("token");
 
-  // ================= FETCH PRODUCT =================
+  // FETCH PRODUCT
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const res = await fetch(
-          `${API_BASE_URL}/api/products/${id}/`,
-          {
-            headers: token
-              ? { Authorization: `Bearer ${token}` }
-              : {},
-          }
-        );
-
-        if (!res.ok) {
-          throw new Error("Failed to fetch product");
-        }
+        const res = await fetch(`${API_BASE_URL}/api/products/${id}/`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
 
         const data = await res.json();
 
@@ -67,7 +48,6 @@ const EditProduct = () => {
 
         setExistingImage(img);
       } catch (err) {
-        console.log("Fetch product error:", err);
         alert("Failed to load product");
       } finally {
         setFetching(false);
@@ -77,15 +57,10 @@ const EditProduct = () => {
     fetchProduct();
   }, [id]);
 
-  // ================= HANDLE CHANGE =================
   const handleChange = (e) => {
-    setForm((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  // ================= IMAGE CHANGE =================
   const handleImage = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -94,12 +69,10 @@ const EditProduct = () => {
     setPreview(URL.createObjectURL(file));
   };
 
-  // ================= UPDATE PRODUCT =================
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!token) {
-      alert("You are not logged in");
       navigate("/login");
       return;
     }
@@ -108,36 +81,26 @@ const EditProduct = () => {
 
     try {
       const formData = new FormData();
-
       formData.append("name", form.name);
       formData.append("description", form.description);
       formData.append("price", form.price);
       formData.append("category", form.category);
 
-      if (image) {
-        formData.append("image", image);
-      }
+      if (image) formData.append("image", image);
 
-      const res = await fetch(
-        `${API_BASE_URL}/api/products/${id}/`,
-        {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          body: formData,
-        }
-      );
+      const res = await fetch(`${API_BASE_URL}/api/products/${id}/`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
 
-      if (!res.ok) {
-        const errText = await res.text();
-        throw new Error(errText);
-      }
+      if (!res.ok) throw new Error();
 
       alert("Product updated successfully 🎉");
       navigate("/dashboard/vendor");
     } catch (err) {
-      console.log("Update error:", err);
       alert("Error updating product");
     } finally {
       setLoading(false);
@@ -146,130 +109,86 @@ const EditProduct = () => {
 
   if (fetching) {
     return (
-      <Box sx={{ p: 5, textAlign: "center" }}>
-        <CircularProgress />
-      </Box>
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="w-8 h-8 border-4 border-gray-300 border-t-blue-600 rounded-full animate-spin"></div>
+      </div>
     );
   }
 
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        background: "#f6f7fb",
-        p: 2,
-      }}
-    >
-      <Paper
-        sx={{
-          p: 4,
-          width: "100%",
-          maxWidth: 500,
-          borderRadius: 3,
-        }}
-      >
-        <Typography variant="h5" fontWeight="bold">
-          Edit Product
-        </Typography>
+    <div className="min-h-screen flex justify-center items-center bg-gray-100 p-4">
+      <div className="w-full max-w-lg bg-white rounded-2xl shadow-md p-6">
 
-        <Typography sx={{ color: "gray", mb: 2 }}>
+        <h1 className="text-xl font-bold">Edit Product</h1>
+        <p className="text-sm text-gray-500 mb-4">
           Update your product details
-        </Typography>
+        </p>
 
-        <form onSubmit={handleSubmit}>
-          {/* NAME */}
-          <TextField
-            label="Product Name"
+        <form onSubmit={handleSubmit} className="space-y-3">
+
+          <input
             name="name"
             value={form.name}
-            fullWidth
-            margin="normal"
             onChange={handleChange}
+            placeholder="Product name"
+            className="w-full p-3 border rounded-lg"
           />
 
-          {/* DESCRIPTION */}
-          <TextField
-            label="Description"
+          <textarea
             name="description"
             value={form.description}
-            fullWidth
-            multiline
-            rows={3}
-            margin="normal"
             onChange={handleChange}
+            placeholder="Description"
+            rows="3"
+            className="w-full p-3 border rounded-lg"
           />
 
-          {/* PRICE */}
-          <TextField
-            label="Price"
+          <input
             name="price"
-            value={form.price}
             type="number"
-            fullWidth
-            margin="normal"
+            value={form.price}
             onChange={handleChange}
+            placeholder="Price"
+            className="w-full p-3 border rounded-lg"
           />
 
-          {/* CATEGORY */}
-          <TextField
-            select
-            label="Category"
+          <select
             name="category"
             value={form.category}
-            fullWidth
-            margin="normal"
             onChange={handleChange}
+            className="w-full p-3 border rounded-lg"
           >
-            <MenuItem value="food">Food</MenuItem>
-            <MenuItem value="fashion">Fashion</MenuItem>
-            <MenuItem value="gadgets">Gadgets</MenuItem>
-            <MenuItem value="academics">Academics</MenuItem>
-            <MenuItem value="skills">Skills</MenuItem>
-          </TextField>
+            <option value="food">Food</option>
+            <option value="fashion">Fashion</option>
+            <option value="gadgets">Gadgets</option>
+            <option value="academics">Academics</option>
+            <option value="skills">Skills</option>
+          </select>
 
-          {/* IMAGE */}
-          <Button variant="outlined" component="label" fullWidth sx={{ mt: 2 }}>
+          <label className="block w-full text-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
             Change Image
-            <input type="file" hidden accept="image/*" onChange={handleImage} />
-          </Button>
+            <input type="file" hidden onChange={handleImage} />
+          </label>
 
-          {/* IMAGE PREVIEW */}
-          <Box sx={{ mt: 2 }}>
-            {preview || existingImage ? (
-              <img
-                src={preview || existingImage}
-                alt="product"
-                style={{
-                  width: "100%",
-                  height: 180,
-                  objectFit: "cover",
-                  borderRadius: 10,
-                }}
-              />
-            ) : null}
-          </Box>
+          {(preview || existingImage) && (
+            <img
+              src={preview || existingImage}
+              alt="product"
+              className="w-full h-44 object-cover rounded-lg"
+            />
+          )}
 
-          {/* SUBMIT */}
-          <Button
+          <button
             type="submit"
-            fullWidth
-            variant="contained"
             disabled={loading}
-            sx={{
-              mt: 3,
-              py: 1.5,
-              borderRadius: 2,
-              textTransform: "none",
-            }}
+            className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
           >
-            {loading ? <CircularProgress size={22} /> : "Update Product"}
-          </Button>
+            {loading ? "Updating..." : "Update Product"}
+          </button>
+
         </form>
-      </Paper>
-    </Box>
+      </div>
+    </div>
   );
 };
 

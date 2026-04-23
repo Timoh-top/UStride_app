@@ -1,12 +1,4 @@
 import React, { useEffect, useState } from "react";
-import {
-  Box,
-  Typography,
-  Card,
-  CardContent,
-  Button,
-  Divider,
-} from "@mui/material";
 import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -26,10 +18,6 @@ const Checkout = () => {
 
   const userEmail = localStorage.getItem("email") || "customer@email.com";
 
-  useEffect(() => {
-    console.log("PAYSTACK KEY LOADED:", publicKey);
-  }, []);
-
   const payWithPaystack = () => {
     if (cartItems.length === 0) {
       toast.error("Your cart is empty");
@@ -37,12 +25,7 @@ const Checkout = () => {
     }
 
     if (!window.PaystackPop) {
-      toast.error("Paystack script not loaded");
-      return;
-    }
-
-    if (!publicKey) {
-      toast.error("Paystack key missing");
+      toast.error("Payment system not loaded");
       return;
     }
 
@@ -54,8 +37,6 @@ const Checkout = () => {
       amount: total * 100,
 
       callback: function (response) {
-        setLoading(false);
-
         fetch(`${API}/api/verify-payment/`, {
           method: "POST",
           headers: {
@@ -64,19 +45,20 @@ const Checkout = () => {
           },
           body: JSON.stringify({
             reference: response.reference,
-            cartItems: cartItems,
-            total: total,
+            cartItems,
+            total,
           }),
         })
           .then((res) => res.json())
           .then(() => {
             toast.success("Payment Successful 🎉");
             clearCart();
-            navigate("/");
+            navigate("/home");
           })
           .catch(() => {
             toast.error("Payment verification failed");
-          });
+          })
+          .finally(() => setLoading(false));
       },
 
       onClose: function () {
@@ -89,77 +71,68 @@ const Checkout = () => {
   };
 
   return (
-    <Box
-      sx={{
-        px: { xs: 1, sm: 2, md: 4 },
-        py: 3,
-        maxWidth: "900px",
-        mx: "auto",
-      }}
-    >
-      <Typography variant="h5" sx={{ fontWeight: "bold", mb: 2 }}>
-        Checkout
-      </Typography>
+    <div className="min-h-screen bg-[#0b0f17] text-white px-4 py-8">
+      
+      {/* Header */}
+      <h1 className="text-2xl font-bold mb-6">Checkout</h1>
 
       {cartItems.length === 0 ? (
-        <Box>
-          <Typography>Your cart is empty</Typography>
-          <Button sx={{ mt: 2 }} variant="contained" onClick={() => navigate("/home")}>
+        <div className="text-center mt-20">
+          <p className="text-gray-400">Your cart is empty</p>
+
+          <button
+            onClick={() => navigate("/home")}
+            className="mt-4 px-6 py-3 bg-blue-600 rounded-xl hover:bg-blue-700 transition"
+          >
             Go Shopping
-          </Button>
-        </Box>
+          </button>
+        </div>
       ) : (
-        <>
-          <Card sx={{ mb: 3 }}>
-            <CardContent>
-              <Typography variant="h6">Order Summary</Typography>
-              <Divider sx={{ my: 2 }} />
+        <div className="max-w-2xl mx-auto space-y-4">
 
+          {/* Order Summary */}
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-xl">
+            <h2 className="text-lg font-semibold mb-3">Order Summary</h2>
+
+            <div className="space-y-3">
               {cartItems.map((item) => (
-                <Box
+                <div
                   key={item.id}
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    mb: 1,
-                  }}
+                  className="flex justify-between text-sm"
                 >
-                  <Typography>
+                  <span className="text-gray-300">
                     {item.name} × {item.quantity}
-                  </Typography>
-                  <Typography>₦{item.price * item.quantity}</Typography>
-                </Box>
+                  </span>
+                  <span className="font-medium">
+                    ₦{(item.price * item.quantity).toLocaleString()}
+                  </span>
+                </div>
               ))}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-          <Card sx={{ p: 2, backgroundColor: "#f9f9f9" }}>
-            <Typography variant="h6">Total</Typography>
+          {/* Total Card */}
+          <div className="bg-gradient-to-br from-white/10 to-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xl">
+            
+            <div className="flex justify-between items-center">
+              <span className="text-gray-300">Total</span>
+              <span className="text-2xl font-bold text-green-400">
+                ₦{total.toLocaleString()}
+              </span>
+            </div>
 
-            <Typography
-              sx={{
-                fontSize: "1.4rem",
-                fontWeight: "bold",
-                color: "green",
-                mt: 1,
-              }}
-            >
-              ₦{total.toLocaleString()}
-            </Typography>
-
-            <Button
-              variant="contained"
-              fullWidth
-              sx={{ mt: 2, backgroundColor: "#00c3ff" }}
+            <button
               onClick={payWithPaystack}
               disabled={loading}
+              className="mt-5 w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 transition font-semibold disabled:opacity-50"
             >
               {loading ? "Processing..." : "Pay Now"}
-            </Button>
-          </Card>
-        </>
+            </button>
+          </div>
+
+        </div>
       )}
-    </Box>
+    </div>
   );
 };
 

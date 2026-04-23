@@ -1,18 +1,10 @@
 import React from "react";
-import { Box } from "@mui/material";
 
 const PageContainer = ({ children }) => {
   return (
-    <Box
-      sx={{
-        px: { xs: 1.5, sm: 2, md: 4 },
-        py: 2,
-        maxWidth: "1200px",
-        mx: "auto",
-      }}
-    >
+    <div className="px-4 sm:px-6 md:px-10 py-4 max-w-[1200px] mx-auto">
       {children}
-    </Box>
+    </div>
   );
 };
 

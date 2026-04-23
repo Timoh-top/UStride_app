@@ -1,11 +1,4 @@
 import React, { useState } from "react";
-import {
-  Box,
-  TextField,
-  Button,
-  Typography,
-  Paper,
-} from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
@@ -25,13 +18,8 @@ const Login = () => {
     try {
       const response = await fetch(`${API}/api/login/`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json();
@@ -42,15 +30,14 @@ const Login = () => {
         return;
       }
 
-      // ✅ Save tokens
       localStorage.setItem("token", data.access);
       localStorage.setItem("refresh", data.refresh);
 
       toast.success("Login successful 🎉");
 
       navigate("/profile");
-    } catch (error) {
-      console.log("Login error:", error);
+    } catch (err) {
+      console.log(err);
       toast.error("Network error. Try again.");
     }
 
@@ -58,68 +45,66 @@ const Login = () => {
   };
 
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: "#f5f5f5",
-        px: 2,
-      }}
-    >
-      <Paper sx={{ p: 4, maxWidth: 400, width: "100%", borderRadius: 3 }}>
-        <Typography variant="h5" fontWeight="bold" mb={3} textAlign="center">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-black to-gray-900 px-4 text-white">
+
+      {/* CARD */}
+      <div className="w-full max-w-md bg-gray-900/80 backdrop-blur-md border border-gray-800 rounded-2xl p-6 shadow-xl">
+
+        {/* TITLE */}
+        <h1 className="text-2xl font-bold text-center mb-6">
           Sign In
-        </Typography>
+        </h1>
 
-        <form onSubmit={handleLogin}>
-          <TextField
-            label="Email"
-            type="email"
-            fullWidth
-            required
-            margin="normal"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
+        <form onSubmit={handleLogin} className="space-y-4">
 
-          <TextField
-            label="Password"
-            type="password"
-            fullWidth
-            required
-            margin="normal"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
+          {/* EMAIL */}
+          <div>
+            <label className="text-sm text-gray-400">Email</label>
+            <input
+              type="email"
+              className="w-full mt-1 px-4 py-3 rounded-lg bg-gray-800 border border-gray-700 focus:outline-none focus:border-blue-500"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
 
-          <Button
+          {/* PASSWORD */}
+          <div>
+            <label className="text-sm text-gray-400">Password</label>
+            <input
+              type="password"
+              className="w-full mt-1 px-4 py-3 rounded-lg bg-gray-800 border border-gray-700 focus:outline-none focus:border-blue-500"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          {/* BUTTON */}
+          <button
             type="submit"
-            variant="contained"
-            fullWidth
-            sx={{ mt: 2 }}
             disabled={loading}
+            className="w-full py-3 rounded-lg bg-blue-600 hover:bg-blue-500 transition font-semibold"
           >
             {loading ? "Logging in..." : "Sign In"}
-          </Button>
+          </button>
         </form>
 
-        <Typography sx={{ mt: 2, textAlign: "center" }}>
+        {/* FOOTER */}
+        <p className="text-center text-sm text-gray-400 mt-6">
           Don’t have an account?{" "}
           <span
-            style={{
-              color: "#1976d2",
-              cursor: "pointer",
-              fontWeight: "bold",
-            }}
             onClick={() => navigate("/register")}
+            className="text-blue-400 cursor-pointer hover:underline"
           >
             Create one
           </span>
-        </Typography>
-      </Paper>
-    </Box>
+        </p>
+      </div>
+    </div>
   );
 };
 

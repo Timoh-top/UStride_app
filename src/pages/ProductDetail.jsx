@@ -1,13 +1,4 @@
 import React, { useEffect, useState } from "react";
-import {
-  Box,
-  Typography,
-  Button,
-  Card,
-  CardMedia,
-  Divider,
-  Paper,
-} from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import ReviewForm from "../components/ReviewForm";
@@ -22,55 +13,85 @@ const ProductDetail = () => {
 
   useEffect(() => {
     const fetchProduct = async () => {
-      const res = await fetch(`${API_BASE_URL}/api/products/${id}/`);
-      const data = await res.json();
-      setProduct(data);
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/products/${id}/`);
+        const data = await res.json();
+        setProduct(data);
+      } catch (err) {
+        console.log(err);
+      }
     };
 
     fetchProduct();
   }, [id]);
 
-  if (!product) return <Typography>Loading...</Typography>;
+  if (!product) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black text-white">
+        Loading...
+      </div>
+    );
+  }
 
   return (
-    <Box sx={{ maxWidth: 900, mx: "auto", p: 2 }}>
-      <Card>
-        <CardMedia
-          component="img"
-          height="300"
-          image={product.image}
+    <div className="min-h-screen bg-black text-white px-4 py-6">
+
+      {/* PRODUCT CARD */}
+      <div className="max-w-3xl mx-auto bg-gray-900 rounded-2xl overflow-hidden border border-gray-800">
+
+        {/* IMAGE */}
+        <img
+          src={
+            product.image?.startsWith("http")
+              ? product.image
+              : `${API_BASE_URL}${product.image}`
+          }
+          alt={product.name}
+          className="w-full h-64 object-cover"
         />
 
-        <Box p={2}>
-          <Typography variant="h5">{product.name}</Typography>
-          <Typography color="green">
+        {/* DETAILS */}
+        <div className="p-5">
+
+          <h1 className="text-2xl font-bold">{product.name}</h1>
+
+          <p className="text-green-400 font-semibold mt-2 text-lg">
             ₦{product.price}
-          </Typography>
-          <Typography mt={2}>{product.description}</Typography>
-        </Box>
-      </Card>
+          </p>
 
-      <Paper sx={{ mt: 2, p: 2 }}>
-        <Button fullWidth onClick={() => addToCart(product)}>
-          Add to Cart
-        </Button>
+          <p className="text-gray-400 mt-4 leading-relaxed">
+            {product.description}
+          </p>
 
-        <Button
-          fullWidth
-          variant="contained"
-          onClick={() => {
-            addToCart(product);
-            navigate("/cart");
-          }}
-        >
-          Buy Now
-        </Button>
-      </Paper>
+          {/* BUTTONS */}
+          <div className="mt-6 space-y-3">
 
-      <Divider sx={{ my: 3 }} />
+            <button
+              onClick={() => addToCart(product)}
+              className="w-full py-3 rounded-lg bg-gray-800 hover:bg-gray-700 transition"
+            >
+              Add to Cart
+            </button>
 
-      <ReviewForm productId={product.id} />
-    </Box>
+            <button
+              onClick={() => {
+                addToCart(product);
+                navigate("/cart");
+              }}
+              className="w-full py-3 rounded-lg bg-blue-600 hover:bg-blue-500 transition font-semibold"
+            >
+              Buy Now
+            </button>
+
+          </div>
+        </div>
+      </div>
+
+      {/* REVIEWS */}
+      <div className="max-w-3xl mx-auto mt-8">
+        <ReviewForm productId={product.id} />
+      </div>
+    </div>
   );
 };
 

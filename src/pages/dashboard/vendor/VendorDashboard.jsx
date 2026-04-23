@@ -1,40 +1,14 @@
 import React, { useEffect, useState } from "react";
-import {
-  Box,
-  Typography,
-  Drawer,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemText,
-  AppBar,
-  Toolbar,
-  Button,
-  Card,
-  CardContent,
-  Grid,
-  IconButton,
-} from "@mui/material";
-
-import AddCircleIcon from "@mui/icons-material/AddCircle";
-import InventoryIcon from "@mui/icons-material/Inventory";
-import DashboardIcon from "@mui/icons-material/Dashboard";
-import SettingsIcon from "@mui/icons-material/Settings";
-import MenuIcon from "@mui/icons-material/Menu";
-
 import { useNavigate } from "react-router-dom";
 
-const drawerWidth = 240;
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 const VendorDashboard = () => {
   const navigate = useNavigate();
-  const [mobileOpen, setMobileOpen] = useState(false);
   const [products, setProducts] = useState([]);
 
   const token = localStorage.getItem("token");
 
-  // ================= FETCH VENDOR PRODUCTS =================
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -43,18 +17,13 @@ const VendorDashboard = () => {
           return;
         }
 
-        const res = await fetch(
-          `${API_BASE_URL}/api/products/`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const res = await fetch(`${API_BASE_URL}/api/products/`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-        if (!res.ok) {
-          throw new Error("Failed to fetch products");
-        }
+        if (!res.ok) throw new Error("Failed");
 
         const data = await res.json();
         setProducts(data);
@@ -66,182 +35,109 @@ const VendorDashboard = () => {
     fetchProducts();
   }, [token, navigate]);
 
-  const menuItems = [
-    { text: "Overview", icon: <DashboardIcon />, path: "/dashboard/vendor" },
-    { text: "Products", icon: <InventoryIcon />, path: "/dashboard/vendor" },
-    { text: "Create Product", icon: <AddCircleIcon />, path: "/post/create" },
-    { text: "Settings", icon: <SettingsIcon />, path: "/profile" },
-  ];
-
-  const drawer = (
-    <Box>
-      <Typography
-        sx={{
-          fontWeight: "bold",
-          p: 2,
-          fontSize: 18,
-        }}
-      >
-        Vendor Panel
-      </Typography>
-
-      <List>
-        {menuItems.map((item) => (
-          <ListItem key={item.text} disablePadding>
-            <ListItemButton onClick={() => navigate(item.path)}>
-              {item.icon}
-              <ListItemText sx={{ ml: 2 }} primary={item.text} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
-    </Box>
-  );
-
   return (
-    <Box sx={{ display: "flex", backgroundColor: "#f6f7fb", minHeight: "100vh" }}>
-      
-      {/* SIDEBAR */}
-      <Drawer
-        variant="permanent"
-        sx={{
-          width: drawerWidth,
-          display: { xs: "none", sm: "block" },
-          "& .MuiDrawer-paper": {
-            width: drawerWidth,
-            boxSizing: "border-box",
-          },
-        }}
-        open
-      >
-        {drawer}
-      </Drawer>
+    <div className="space-y-6">
 
-      {/* MOBILE SIDEBAR */}
-      <Drawer
-        open={mobileOpen}
-        onClose={() => setMobileOpen(false)}
-        sx={{ display: { sm: "none" } }}
-      >
-        {drawer}
-      </Drawer>
+      {/* HEADER */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-white">
+            Vendor Dashboard
+          </h1>
+          <p className="text-gray-400 text-sm">
+            Manage your products and track performance
+          </p>
+        </div>
 
-      {/* MAIN AREA */}
-      <Box sx={{ flex: 1 }}>
-        
-        {/* TOP BAR */}
-        <AppBar
-          position="static"
-          sx={{ background: "white", color: "black", boxShadow: 1 }}
+        <button
+          onClick={() => navigate("/product/create")}
+          className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl text-white font-semibold transition"
         >
-          <Toolbar>
-            <IconButton
-              sx={{ display: { sm: "none" } }}
-              onClick={() => setMobileOpen(true)}
-            >
-              <MenuIcon />
-            </IconButton>
+          + Add Product
+        </button>
+      </div>
 
-            <Typography sx={{ flexGrow: 1, fontWeight: "bold" }}>
-              Dashboard
-            </Typography>
+      {/* STATS */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 
-            <Button
-              variant="contained"
-              onClick={() => navigate("/post/create")}
-              startIcon={<AddCircleIcon />}
-            >
-              Add Product
-            </Button>
-          </Toolbar>
-        </AppBar>
+        <div className="bg-gray-900 p-5 rounded-2xl border border-gray-800">
+          <p className="text-gray-400 text-sm">Total Products</p>
+          <h2 className="text-3xl font-bold mt-2">{products.length}</h2>
+        </div>
 
-        {/* CONTENT */}
-        <Box sx={{ p: 3 }}>
-          
-          {/* STATS */}
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={4}>
-              <Card>
-                <CardContent>
-                  <Typography>Total Products</Typography>
-                  <Typography variant="h4">{products.length}</Typography>
-                </CardContent>
-              </Card>
-            </Grid>
+        <div className="bg-gray-900 p-5 rounded-2xl border border-gray-800">
+          <p className="text-gray-400 text-sm">Active Listings</p>
+          <h2 className="text-3xl font-bold mt-2">{products.length}</h2>
+        </div>
 
-            <Grid item xs={12} sm={4}>
-              <Card>
-                <CardContent>
-                  <Typography>Active Listings</Typography>
-                  <Typography variant="h4">{products.length}</Typography>
-                </CardContent>
-              </Card>
-            </Grid>
+        <div className="bg-gray-900 p-5 rounded-2xl border border-gray-800">
+          <p className="text-gray-400 text-sm">Revenue</p>
+          <h2 className="text-3xl font-bold mt-2 text-green-400">₦0</h2>
+        </div>
 
-            <Grid item xs={12} sm={4}>
-              <Card>
-                <CardContent>
-                  <Typography>Revenue</Typography>
-                  <Typography variant="h4">₦0</Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          </Grid>
+      </div>
 
-          {/* PRODUCTS */}
-          <Box sx={{ mt: 4 }}>
-            <Typography variant="h6" sx={{ mb: 2 }}>
-              Your Products
-            </Typography>
+      {/* PRODUCTS */}
+      <div>
+        <h2 className="text-lg font-semibold mb-3 text-white">
+          Your Products
+        </h2>
 
-            <Grid container spacing={2}>
-              {products.map((p) => (
-                <Grid item xs={12} sm={6} md={4} key={p.id}>
-                  <Card sx={{ borderRadius: 3 }}>
+        {products.length === 0 ? (
+          <div className="bg-gray-900 p-6 rounded-2xl text-center text-gray-400">
+            No products yet
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
 
-                    {/* IMAGE FIX */}
-                    <img
-                      src={
-                        p.image
-                          ? p.image.startsWith("http")
-                            ? p.image
-                            : `${API_BASE_URL}${p.image}`
-                          : "/placeholder.png"
+            {products.map((p) => {
+              const imageUrl =
+                p.image?.startsWith("http")
+                  ? p.image
+                  : p.image
+                  ? `${API_BASE_URL}${p.image}`
+                  : "/placeholder.png";
+
+              return (
+                <div
+                  key={p.id}
+                  className="bg-gray-900 rounded-2xl overflow-hidden border border-gray-800 hover:border-gray-700 transition"
+                >
+                  {/* IMAGE */}
+                  <img
+                    src={imageUrl}
+                    alt={p.name}
+                    className="w-full h-32 object-cover"
+                  />
+
+                  {/* CONTENT */}
+                  <div className="p-3">
+                    <h3 className="text-sm font-semibold truncate">
+                      {p.name}
+                    </h3>
+
+                    <p className="text-green-400 text-sm mt-1">
+                      ₦{Number(p.price).toLocaleString()}
+                    </p>
+
+                    <button
+                      onClick={() =>
+                        navigate(`/product/edit/${p.id}`)
                       }
-                      alt={p.name}
-                      style={{
-                        width: "100%",
-                        height: 160,
-                        objectFit: "cover",
-                      }}
-                    />
+                      className="mt-2 w-full text-xs bg-gray-800 hover:bg-gray-700 py-1.5 rounded-lg transition"
+                    >
+                      Edit
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
 
-                    <CardContent>
-                      <Typography fontWeight="bold">
-                        {p.name}
-                      </Typography>
+          </div>
+        )}
+      </div>
 
-                      <Typography>₦{p.price}</Typography>
-
-                      <Button
-                        size="small"
-                        onClick={() =>
-                          navigate(`/product/edit/${p.id}`)
-                        }
-                      >
-                        Edit
-                      </Button>
-                    </CardContent>
-                  </Card>
-                </Grid>
-              ))}
-            </Grid>
-          </Box>
-
-        </Box>
-      </Box>
-    </Box>
+    </div>
   );
 };
 

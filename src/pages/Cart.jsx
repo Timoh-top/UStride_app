@@ -1,20 +1,6 @@
 import React from "react";
-import {
-  Box,
-  Typography,
-  Grid,
-  Button,
-  Card,
-  IconButton,
-  Divider,
-  Paper,
-} from "@mui/material";
-
 import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
-
-import AddIcon from "@mui/icons-material/Add";
-import RemoveIcon from "@mui/icons-material/Remove";
 
 const Cart = () => {
   const { cartItems, removeFromCart, updateQuantity } = useCart();
@@ -36,138 +22,126 @@ const Cart = () => {
   };
 
   return (
-    <Box sx={{ px: { xs: 1, md: 4 }, py: 2, maxWidth: "1100px", mx: "auto" }}>
+    <div className="min-h-screen bg-[#0b0f17] text-white px-4 py-6">
 
-      {/* HEADER */}
-      <Typography variant="h5" sx={{ fontWeight: "bold", mb: 2 }}>
-        Your Cart
-      </Typography>
+      {/* Header */}
+      <h1 className="text-2xl font-bold mb-6">Your Cart</h1>
 
       {/* EMPTY STATE */}
       {cartItems.length === 0 ? (
-        <Box sx={{ textAlign: "center", mt: 8 }}>
-          <Typography>🛒 Your cart is empty</Typography>
+        <div className="text-center mt-20">
+          <p className="text-gray-400">🛒 Your cart is empty</p>
 
-          <Button
-            variant="contained"
-            sx={{ mt: 2 }}
-            onClick={() => navigate("/")}
+          <button
+            onClick={() => navigate("/home")}
+            className="mt-4 px-6 py-3 bg-blue-600 rounded-xl hover:bg-blue-700 transition"
           >
             Go Shopping
-          </Button>
-        </Box>
+          </button>
+        </div>
       ) : (
-        <Grid container spacing={2}>
+        <div className="max-w-5xl mx-auto grid md:grid-cols-3 gap-6">
 
           {/* LEFT - ITEMS */}
-          <Grid item xs={12} md={8}>
-            {cartItems.map((item) => {
-              const imageUrl =
-                item.image?.startsWith("http")
-                  ? item.image
-                  : item.image || "/placeholder.png";
+          <div className="md:col-span-2 space-y-4">
 
-              return (
-                <Card
-                  key={item.id}
-                  sx={{
-                    display: "flex",
-                    mb: 2,
-                    p: 1,
-                    borderRadius: 2,
-                    alignItems: "center",
-                  }}
+            {cartItems.map((item) => (
+              <div
+                key={item.id}
+                className="flex items-center gap-4 bg-white/5 border border-white/10 rounded-2xl p-3 backdrop-blur-xl"
+              >
+
+                {/* IMAGE */}
+                <img
+                  src={
+                    item.image?.startsWith("http")
+                      ? item.image
+                      : item.image || "/placeholder.png"
+                  }
+                  alt={item.name}
+                  className="w-20 h-20 object-cover rounded-xl"
+                />
+
+                {/* DETAILS */}
+                <div className="flex-1">
+                  <h2 className="font-semibold">{item.name}</h2>
+                  <p className="text-green-400 font-bold">
+                    ₦{Number(item.price).toLocaleString()}
+                  </p>
+
+                  {/* QUANTITY */}
+                  <div className="flex items-center mt-2 gap-2">
+                    <button
+                      onClick={() => handleDecrease(item)}
+                      className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20"
+                    >
+                      -
+                    </button>
+
+                    <span>{item.quantity}</span>
+
+                    <button
+                      onClick={() => handleIncrease(item)}
+                      className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+
+                {/* REMOVE */}
+                <button
+                  onClick={() => removeFromCart(item.id)}
+                  className="text-red-400 hover:text-red-500 text-sm"
                 >
-                  {/* IMAGE */}
-                  <Box
-                    component="img"
-                    src={imageUrl}
-                    sx={{
-                      width: 90,
-                      height: 90,
-                      objectFit: "cover",
-                      borderRadius: 2,
-                    }}
-                  />
+                  Remove
+                </button>
 
-                  {/* DETAILS */}
-                  <Box sx={{ flex: 1, px: 2 }}>
-                    <Typography sx={{ fontWeight: "bold" }}>
-                      {item.name}
-                    </Typography>
+              </div>
+            ))}
 
-                    <Typography sx={{ color: "green", fontWeight: "bold" }}>
-                      ₦{Number(item.price).toLocaleString()}
-                    </Typography>
-
-                    {/* QUANTITY */}
-                    <Box sx={{ display: "flex", alignItems: "center", mt: 1 }}>
-                      <IconButton onClick={() => handleDecrease(item)}>
-                        <RemoveIcon />
-                      </IconButton>
-
-                      <Typography>{item.quantity}</Typography>
-
-                      <IconButton onClick={() => handleIncrease(item)}>
-                        <AddIcon />
-                      </IconButton>
-                    </Box>
-                  </Box>
-
-                  {/* REMOVE */}
-                  <Button
-                    color="error"
-                    onClick={() => removeFromCart(item.id)}
-                  >
-                    Remove
-                  </Button>
-                </Card>
-              );
-            })}
-          </Grid>
+          </div>
 
           {/* RIGHT - SUMMARY */}
-          <Grid item xs={12} md={4}>
-            <Paper sx={{ p: 2, borderRadius: 2 }}>
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xl h-fit">
 
-              <Typography fontWeight="bold">Order Summary</Typography>
+            <h2 className="text-lg font-semibold">Order Summary</h2>
 
-              <Divider sx={{ my: 2 }} />
+            <div className="mt-4 space-y-2 text-sm text-gray-300">
 
-              <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                <Typography>Subtotal</Typography>
-                <Typography>₦{total.toLocaleString()}</Typography>
-              </Box>
+              <div className="flex justify-between">
+                <span>Subtotal</span>
+                <span>₦{total.toLocaleString()}</span>
+              </div>
 
-              <Box sx={{ display: "flex", justifyContent: "space-between", mt: 1 }}>
-                <Typography>Delivery</Typography>
-                <Typography>Free</Typography>
-              </Box>
+              <div className="flex justify-between">
+                <span>Delivery</span>
+                <span>Free</span>
+              </div>
 
-              <Divider sx={{ my: 2 }} />
+            </div>
 
-              <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                <Typography fontWeight="bold">Total</Typography>
-                <Typography fontWeight="bold" color="green">
-                  ₦{total.toLocaleString()}
-                </Typography>
-              </Box>
+            <div className="border-t border-white/10 my-4"></div>
 
-              <Button
-                fullWidth
-                variant="contained"
-                sx={{ mt: 2, bgcolor: "#111" }}
-                onClick={() => navigate("/checkout")}
-              >
-                Checkout
-              </Button>
+            <div className="flex justify-between font-bold">
+              <span>Total</span>
+              <span className="text-green-400">
+                ₦{total.toLocaleString()}
+              </span>
+            </div>
 
-            </Paper>
-          </Grid>
+            <button
+              onClick={() => navigate("/checkout")}
+              className="w-full mt-5 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 transition font-semibold"
+            >
+              Checkout
+            </button>
 
-        </Grid>
+          </div>
+
+        </div>
       )}
-    </Box>
+    </div>
   );
 };
 

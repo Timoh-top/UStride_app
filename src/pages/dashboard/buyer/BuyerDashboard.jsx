@@ -1,31 +1,49 @@
 import React from "react";
-import { Box, Typography, Grid, Card } from "@mui/material";
 
 const BuyerDashboard = () => {
   return (
-    <Box sx={{ p: 3, backgroundColor: "#f7f8fa", minHeight: "100vh" }}>
-      
-      <Typography variant="h5" fontWeight="bold" mb={3}>
-        Welcome Back 👋
-      </Typography>
+    <div className="min-h-screen bg-gray-950 text-white p-4 md:p-6">
 
-      <Grid container spacing={2}>
-        <Grid item xs={12} sm={6}>
-          <Card sx={{ p: 3, borderRadius: 3, boxShadow: 2 }}>
-            <Typography fontWeight="bold">My Orders</Typography>
-            <Typography sx={{ mt: 1, color: "gray" }}>Track your purchases</Typography>
-          </Card>
-        </Grid>
+      {/* HEADER */}
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold">
+          Welcome Back 👋
+        </h1>
+        <p className="text-gray-400 text-sm">
+          Manage your orders and saved items
+        </p>
+      </div>
 
-        <Grid item xs={12} sm={6}>
-          <Card sx={{ p: 3, borderRadius: 3, boxShadow: 2 }}>
-            <Typography fontWeight="bold">Wishlist</Typography>
-            <Typography sx={{ mt: 1, color: "gray" }}>Saved products</Typography>
-          </Card>
-        </Grid>
-      </Grid>
+      {/* CARDS */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
-    </Box>
+        {/* ORDERS */}
+        <div className="bg-gray-900 p-5 rounded-2xl border border-gray-800 hover:border-gray-700 transition">
+          <h2 className="font-semibold text-lg">My Orders</h2>
+          <p className="text-gray-400 text-sm mt-2">
+            Track your purchases and delivery status
+          </p>
+
+          <button className="mt-4 text-sm bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl transition">
+            View Orders
+          </button>
+        </div>
+
+        {/* WISHLIST */}
+        <div className="bg-gray-900 p-5 rounded-2xl border border-gray-800 hover:border-gray-700 transition">
+          <h2 className="font-semibold text-lg">Wishlist</h2>
+          <p className="text-gray-400 text-sm mt-2">
+            Save products you like for later
+          </p>
+
+          <button className="mt-4 text-sm bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-xl transition">
+            View Wishlist
+          </button>
+        </div>
+
+      </div>
+
+    </div>
   );
 };
 

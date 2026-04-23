@@ -1,23 +1,26 @@
-import React from "react";
-import { Box } from "@mui/material";
+import React, { useState } from "react";
 
 const StarSelector = ({ rating, setRating }) => {
+  const [hover, setHover] = useState(0);
+
   return (
-    <Box sx={{ display: "flex", gap: 0.5, cursor: "pointer" }}>
+    <div className="flex gap-1 cursor-pointer">
       {[1, 2, 3, 4, 5].map((star) => (
         <span
           key={star}
           onClick={() => setRating(star)}
-          style={{
-            fontSize: "22px",
-            color: star <= rating ? "#f5a623" : "#ddd",
-            transition: "0.2s",
-          }}
+          onMouseEnter={() => setHover(star)}
+          onMouseLeave={() => setHover(0)}
+          className={`text-2xl transition duration-150 ${
+            (hover || rating) >= star
+              ? "text-yellow-400"
+              : "text-gray-400"
+          }`}
         >
           ★
         </span>
       ))}
-    </Box>
+    </div>
   );
 };
 

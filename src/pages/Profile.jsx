@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { Box, Avatar, Typography, Paper, Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
 const API = import.meta.env.VITE_API_URL;
@@ -20,92 +19,84 @@ const Profile = () => {
           return;
         }
 
-        const response = await fetch(`${API}/api/profile/`, {
-          method: "GET",
+        const res = await fetch(`${API}/api/profile/`, {
           headers: {
-            "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
         });
 
-        if (!response.ok) {
-          if (response.status === 401) {
-            navigate("/login");
-          }
+        if (!res.ok) {
+          if (res.status === 401) navigate("/login");
           return;
         }
 
-        const data = await response.json();
+        const data = await res.json();
         setProfile(data);
-
-      } catch (error) {
-        console.log("Profile fetch error:", error);
+      } catch (err) {
+        console.log(err);
+      } finally {
+        setLoading(false);
       }
-
-      setLoading(false);
     };
 
     fetchProfile();
   }, [navigate]);
 
   if (loading) {
-    return <p style={{ textAlign: "center" }}>Loading...</p>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black text-white">
+        Loading...
+      </div>
+    );
   }
 
   if (!profile) {
-    return <p style={{ textAlign: "center" }}>No profile found</p>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black text-white">
+        No profile found
+      </div>
+    );
   }
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        minHeight: "80vh",
-        px: 2,
-      }}
-    >
-      <Paper
-        elevation={5}
-        sx={{
-          p: 4,
-          width: "100%",
-          maxWidth: 450,
-          textAlign: "center",
-        }}
-      >
-        {/* Avatar */}
-        <Avatar
-          src={profile.profile_picture}
-          sx={{ width: 100, height: 100, mx: "auto", mb: 2 }}
-        />
+    <div className="min-h-screen bg-black text-white flex items-center justify-center px-4">
 
-        {/* Username */}
-        <Typography variant="h6" fontWeight="bold">
+      <div className="w-full max-w-md bg-gray-900 border border-gray-800 rounded-2xl p-6 text-center shadow-lg">
+
+        {/* AVATAR */}
+        <div className="flex justify-center">
+          <img
+            src={profile.profile_picture}
+            alt="Profile"
+            className="w-24 h-24 rounded-full object-cover border-2 border-gray-700"
+          />
+        </div>
+
+        {/* USERNAME */}
+        <h2 className="text-xl font-bold mt-4">
           {profile.username}
-        </Typography>
+        </h2>
 
-        {/* Email */}
-        <Typography sx={{ color: "gray", mb: 1 }}>
+        {/* EMAIL */}
+        <p className="text-gray-400 text-sm mt-1">
           {profile.email}
-        </Typography>
+        </p>
 
-        {/* Role */}
-        <Typography sx={{ mb: 2 }}>
+        {/* ROLE BADGE */}
+        <div className="mt-4 inline-block px-3 py-1 text-sm bg-gray-800 rounded-full text-gray-300">
           Role: {profile.role}
-        </Typography>
+        </div>
 
-        {/* Home button */}
-        <Button
-          variant="contained"
-          fullWidth
+        {/* BUTTON */}
+        <button
           onClick={() => navigate("/home")}
+          className="w-full mt-6 py-3 rounded-lg bg-blue-600 hover:bg-blue-500 transition font-semibold"
         >
           Go to Home
-        </Button>
-      </Paper>
-    </Box>
+        </button>
+
+      </div>
+    </div>
   );
 };
 
